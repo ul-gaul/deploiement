@@ -20,6 +20,8 @@ typedef struct {
     unsigned int sequence_time;
     unsigned int period;
     unsigned int sequence_begin_time;
+    unsigned int counter;
+    unsigned int current_cycle;
 } buzzer;
 
 
