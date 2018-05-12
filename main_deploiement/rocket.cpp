@@ -44,7 +44,11 @@ bool Rocket::updateAltitude() {
     bool validAltitude;
     float mesuredAltitude;
 
-    mesuredAltitude = _altimeter.readAltitude(_groundPressure);
+    if(IS_TEST_MODE) {
+        mesuredAltitude = _getSimulationAltitude(readIndex);
+    } else {
+        mesuredAltitude = _altimeter.readAltitude(_groundPressure);
+    }
     validAltitude = _validateAltitude(mesuredAltitude);
     
     if(validAltitude) {
@@ -172,6 +176,7 @@ void Rocket::_initLogUnit(byte chipSelectPin, long serialBaudRate, String fileNa
         String fileNameTemp = fileName + '_' + String(i) + LOG_UNIT_FILE_EXT;
         if (!SD.exists(fileNameTemp)) {
             fileName = fileNameTemp;
+            log_filename = filename;
             break;
         }
     }
@@ -185,6 +190,16 @@ void Rocket::_initLogUnit(byte chipSelectPin, long serialBaudRate, String fileNa
     if (_logFile) {
         _logFile.println(dataStream);
     }
+}
+
+float Rocket::_getSimulationAltitude(unsigned int index) {
+    float sim_alti;
+    _logFile.close();
+    _simFile = SD.open(sim_filename, FILE_READ);
+    
+    _simFile.close();
+    _logFile = SD.open(log_filename, FILE_WRITE);
+    return sim_alti;
 }
 
 void Rocket::_prepareAltitudeVector() {

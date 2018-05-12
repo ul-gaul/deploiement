@@ -10,6 +10,10 @@
 
 #include "configCircuitDeploiement.h"
 
+#define TEST_MODE 0
+String sim_filename = "vol_2017.csv"
+String log_filename;
+
 class Rocket {
     public:
         Rocket();
@@ -36,11 +40,13 @@ class Rocket {
         
         Adafruit_BMP085 _altimeter;
         File _logFile;
+        File _simFile;
         Buzzer _buzzer;
         Match _drogueParachute;
         Match _mainParachute;
         
         void _initLogUnit(byte chipSelectPin, long serialBaudRate, String fileName);
+        float _getSimulationAltitude(unsigned int index);
         void _initAltimeter();
 
         bool _validateAltitude(float mesuredAltitude);
