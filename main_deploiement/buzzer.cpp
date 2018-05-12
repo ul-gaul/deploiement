@@ -6,7 +6,7 @@ void buzzerON(buzzer* buz) {
     digitalWrite(buz->pin, HIGH);
 }
 
-void buzzerOFF() {
+void buzzerOFF(buzzer* buz) {
     digitalWrite(buz->pin, LOW);
 }
 
