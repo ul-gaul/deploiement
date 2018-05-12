@@ -8,10 +8,42 @@ descente, lorsque l'altitude atteint un certain seuil. De plus, un buzzer
 signal lorsqu'il y a un continuité dans les allumettes.
 */
 
+#include <Wire.h>
+
+enum FlightState {
+    FLIGHT_LAUNCHPAD,
+    FLIGHT_BURNOUT,
+    FLIGHT_PRE_DROGUE,
+    FLIGHT_PRE_MAIN,
+    FLIGHT_DRIFT,
+    FLIGHT_LANDED
+};
+
+FlightState current_flight_state = FLIGHT_LAUNCHPAD;
+
 void setup() {
     
 }
 
 void loop() {
-    
+    switch(current_flight_state) {
+        case FLIGHT_LAUNCHPAD:
+            
+            break;
+        case FLIGHT_BURNOUT:
+            
+            break;
+        case FLIGHT_PRE_DROGUE:
+            
+            break;
+        case FLIGHT_PRE_MAIN:
+            
+            break;
+        case FLIGHT_DRIFT:
+            
+            break;
+        case FLIGHT_LANDED:
+            
+            break;
+    }
 }
