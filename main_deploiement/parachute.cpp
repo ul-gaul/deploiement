@@ -8,7 +8,7 @@ void init_parachute(parachute* para, unsigned int control, unsigned int state) {
     digitalWrite(para->control_pin, LOW);
 }
 
-boolean check_connection(parachute* para) {
+int check_connection(parachute* para) {
     return digitalRead(para->state_pin);
 }
 

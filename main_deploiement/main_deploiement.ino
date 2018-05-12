@@ -9,9 +9,12 @@ signal lorsqu'il y a un continuité dans les allumettes.
 */
 
 // standard libraries includes
+#include <SPI.h>
 #include <Wire.h>
+#include <SD.h>
 
 // project libraries includes
+#include "config_deploiement.h"
 #include "parachute.h"
 
 
@@ -29,7 +32,16 @@ enum FlightState {
 FlightState current_flight_state = FLIGHT_LAUNCHPAD;
 
 
+parachute para_drogue;
+parachute para_main;
+
+
+int check_parachutes(parachute* para);
+
+
 void setup() {
+    init_parachute(&para_drogue, IO_DROGUE_CTRL, IO_DROGUE_STATE);
+    init_parachute(&para_main, IO_MAIN_CTRL, IO_MAIN_STATE);
     
 }
 
@@ -54,4 +66,16 @@ void loop() {
             
             break;
     }
+}
+
+int check_parachutes(parachute* p_main, parachute* p_drogue) {
+    // get states of the parachutes
+    int main_state;
+    int drogue_state;
+    main_state = check_connection(p_main);
+    drogue_state = check_connection(p_drogue);
+    // play appropriate buzzer sequence
+    // TODO: buzzer sequence in check_parachutes function
+    // return the global parachute state
+    return main_state + drogue_state;
 }

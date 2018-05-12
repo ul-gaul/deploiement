@@ -9,8 +9,6 @@
 #include <Wire.h>
 #include "Adafruit_BMP085.h"
 #include "SD.h"
-#include "buzzer.h"
-#include "match.h"
 
 
 //-----------------------------------------------------------------------------------
@@ -36,10 +34,10 @@
 #define IO_BUZZER_OUT   3         // Sortie du signal sonore pour le buzzer
 
 // Parachutes
-#define IO_DROGUE_OUT           5 // Sortie du signal de déploiement du drogue
-#define IO_MAIN_OUT             6 // Sortie du signal de déploiement du main
-#define IO_DROGUE_FEEDBACK      7 // Entrée vérifiant la continuité de l'alumette du drogue
-#define IO_MAIN_FEEDBACK        8 // Entrée vérifiant la continuité de l'alumette du main
+#define IO_DROGUE_CTRL      5 // Sortie du signal de déploiement du drogue
+#define IO_MAIN_CTRL        6 // Sortie du signal de déploiement du main
+#define IO_DROGUE_STATE     7 // Entrée vérifiant la continuité de l'alumette du drogue
+#define IO_MAIN_STATE       8 // Entrée vérifiant la continuité de l'alumette du main
 
 //-----------------------------------------------------------------------------------
 //  Altimeter
