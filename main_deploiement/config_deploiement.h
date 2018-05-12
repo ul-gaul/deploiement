@@ -130,14 +130,6 @@ const float B[ALTITUDE_ARRAY_SIZE] = {
 // Fréquence d'échantillonage
 #define DATA_SAMPLING_PERIOD    100000 // 100000 micro-secondes ou un fréquence de 10 Hz.
 
-// Étapes du plan de vol
-#define FLIGHT_STEP_LAUNCHPAD   0
-#define FLIGHT_STEP_BURNOUT     1
-#define FLIGHT_STEP_PRE_DROGUE  2
-#define FLIGHT_STEP_PRE_MAIN    3
-#define FLIGHT_STEP_DRIFT       4
-#define FLIGHT_STEP_IDLE        5
-
 //-----------------------------------------------------------------------------------
 // Breakpoint d'altitude (m) et de vitessse (m/ech) ou un echétantillion est 0,1 s
 #define BREAKPOINT_SPEED_TO_BURNOUT     3    // 30 m/s - Breakpoint pour passer du launchpad au burnout
