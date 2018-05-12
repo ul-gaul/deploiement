@@ -10,6 +10,8 @@ signal lorsqu'il y a un continuité dans les allumettes.
 
 #include <Wire.h>
 
+#define TEST_MODE 0
+
 enum FlightState {
     FLIGHT_LAUNCHPAD,
     FLIGHT_BURNOUT,
