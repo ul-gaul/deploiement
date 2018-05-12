@@ -8,7 +8,12 @@ descente, lorsque l'altitude atteint un certain seuil. De plus, un buzzer
 signal lorsqu'il y a un continuité dans les allumettes.
 */
 
+// standard libraries includes
 #include <Wire.h>
+
+// project libraries includes
+#include "parachute.h"
+
 
 #define TEST_MODE 0
 
@@ -22,6 +27,7 @@ enum FlightState {
 };
 
 FlightState current_flight_state = FLIGHT_LAUNCHPAD;
+
 
 void setup() {
     
