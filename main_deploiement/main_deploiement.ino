@@ -8,6 +8,8 @@ certain seuil. De plus, un buzzer signal lorsqu'il y a un continuité dans les a
 ----------------------------------------------------------------------------------------------
  */
  
+#include <SPI.h>
+#include <Wire.h>
 #include <TimerOne.h>
 #include "rocket.h"
 

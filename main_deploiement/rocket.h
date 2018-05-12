@@ -10,7 +10,8 @@
 
 #include "configCircuitDeploiement.h"
 
-#define TEST_MODE 0
+#define TEST_MODE 1
+
 String sim_filename = "vol_2017.csv"
 String log_filename;
 

@@ -5,9 +5,9 @@
 #ifndef _configCircuitDeploiement_h
 #define _configCircuitDeploiement_h
 
+#include <SPI.h>
 #include <Wire.h>
 #include "Adafruit_BMP085.h"
-#include <SPI.h>
 #include "SD.h"
 #include "buzzer.h"
 #include "match.h"
