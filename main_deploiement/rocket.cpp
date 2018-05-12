@@ -194,8 +194,10 @@ void Rocket::_initLogUnit(byte chipSelectPin, long serialBaudRate, String fileNa
 
 float Rocket::_getSimulationAltitude(unsigned int index) {
     float sim_alti;
+    String line;
     _logFile.close();
     _simFile = SD.open(sim_filename, FILE_READ);
+    line = _simFile.readStringUntil('\n');
     
     _simFile.close();
     _logFile = SD.open(log_filename, FILE_WRITE);
