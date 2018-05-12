@@ -1,12 +1,12 @@
-/*
-Ce programme vise à être utilisé avec le système de déploiement des parachutes
-
-Il permet de faire la mesure d'altitude à partir d'un altimètre barométrique 
-BMP et de l'enregistrer sur une carte SD, et envoi le signal de déploiement du 
-drogue à l'apogée et celui du déploiement du parachute principal lors de la 
-descente, lorsque l'altitude atteint un certain seuil. De plus, un buzzer 
-signal lorsqu'il y a un continuité dans les allumettes.
-*/
+/* 
+ * This is the program controlling the parachute deployment system
+ * 
+ * The program uses a BMP180 to measure altitude and logs its data on an
+ * SD card. Various libraries are used to trigger the deployment of the 
+ * drogue chute and the main chute. A buzzer is also used to indicate that 
+ * the parachute's electronic matches are connected. Finally, all the 
+ * configuration values are stored in a seperate configuration file.
+ */
 
 // standard libraries includes
 #include <SPI.h>
@@ -69,7 +69,14 @@ void loop() {
 }
 
 int check_parachutes(parachute* p_main, parachute* p_drogue) {
-    // get states of the parachutes
+    /* get states of the parachutes
+     * Truth table is the following:
+     *      main    drogue      global state
+     *      0       0           0
+     *      0       1           1
+     *      1       0           2
+     *      1       1           3
+     */
     int main_state;
     int drogue_state;
     main_state = check_connection(p_main);
@@ -77,5 +84,5 @@ int check_parachutes(parachute* p_main, parachute* p_drogue) {
     // play appropriate buzzer sequence
     // TODO: buzzer sequence in check_parachutes function
     // return the global parachute state
-    return main_state + drogue_state;
+    return main_state*2 + drogue_state;
 }
