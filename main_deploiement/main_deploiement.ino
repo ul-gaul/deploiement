@@ -30,13 +30,13 @@ void setup() {
 }
 
 void loop() {
+    bool validAltitude;   
     if(altitudeUpToDate == false) {
-        bool validAltitude;        
-        altitudeUpToDate = true;      
         validAltitude = rocket.updateAltitude();
         if(validAltitude) {
             rocket.logData();
             followFlightPlan();
+            altitudeUpToDate = true;
         }
         else {
             rocket.logEvent(MESSAGE_INVALID_ALTITUDE);

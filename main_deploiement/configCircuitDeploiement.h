@@ -13,7 +13,7 @@
 #include "match.h"
 
 
-//-------------------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------
 //  Hardware pinout
 
 // BMP180 -> Arduino Nano
@@ -41,12 +41,12 @@
 #define IO_DROGUE_FEEDBACK      7 // Entrée vérifiant la continuité de l'alumette du drogue
 #define IO_MAIN_FEEDBACK        8 // Entrée vérifiant la continuité de l'alumette du main
 
-//-------------------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------
 //  Altimeter
 
 #define ALTIMETER_INVALID_ALTITUDE_TOLERANCE    1000.0
 
-//-------------------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------
 //  Log unit
 
 // Paramètres
@@ -71,7 +71,7 @@
 #define ID_LOG_EVENT      2   //chiffre qui va avoir au début de chaque ligne du header qui est un evenement
 
 
-//-------------------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------
 //  Buzzer
 
 // Paramètres du signal sonore
@@ -79,7 +79,7 @@
 #define BUZZER_CYCLE_DURATION         1000
 
 
-//-------------------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------
 //  Matches
 
 // Id des parachutes
@@ -92,7 +92,7 @@
 #define TAG_PARACHUTE_DROGUE_ONLY 2
 #define TAG_PARACHUTE_NULL        1
 
-//-------------------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------
 //  Paramètres du filtre passe-bas de la fusée
 /*
  * Le filtre utilisé est un filtre éliptique passe-bas fait à l'aide de MatLab. (Fonction Ellip())
@@ -124,7 +124,7 @@ const float B[ALTITUDE_ARRAY_SIZE] = {
 };
 
 
-//-------------------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------
 //  Paramètres de la boucle principale
 
 // Fréquence d'échantillonage
@@ -138,7 +138,7 @@ const float B[ALTITUDE_ARRAY_SIZE] = {
 #define FLIGHT_STEP_DRIFT       4
 #define FLIGHT_STEP_IDLE        5
 
-//-------------------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------
 // Breakpoint d'altitude (m) et de vitessse (m/ech) ou un echétantillion est 0,1 s
 #define BREAKPOINT_SPEED_TO_BURNOUT     3    // 30 m/s - Breakpoint pour passer du launchpad au burnout
 #define BREAKPOINT_SPEED_TO_PRE_DROGUE  3    // 30 m/s - Breakpoint pour passer du burnout au predrogue
