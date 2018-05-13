@@ -38,7 +38,8 @@ void execute_sequence(buzzer* buz, unsigned int cycles) {
         buz->time_counter = 0;
     }
     // check progress in current sequence and activate the buzzer accordingly
-    // compute the current state the buzzer should be in
+    // compute the current state the buzzer should be in and change the output
+    // of the buzzer's control pin accordingly
     unsigned int i = buz->time_counter / (buz->cycle_period / 2);
     if(i%2 == 0 || i > (cycles / 2) - 1) {
         buzzerOFF(buz);
