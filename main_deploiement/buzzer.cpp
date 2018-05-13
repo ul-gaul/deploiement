@@ -26,7 +26,7 @@ void init_buzzer(buzzer* buz, unsigned int p_pin, unsigned int p_sequence_period
     // initialize sequence time counter
     buz->time_counter = 0;
     // initialize current cycle
-    buz->current_cycle = 0;
+    buz->current_state = 0;
 }
 
 void execute_sequence(buzzer* buz, unsigned int cycles) {
@@ -38,5 +38,11 @@ void execute_sequence(buzzer* buz, unsigned int cycles) {
         buz->time_counter = 0;
     }
     // check progress in current sequence and activate the buzzer accordingly
-    // TODO: algorithm for the buzzing
+    // compute the current state the buzzer should be in
+    unsigned int i = buz->time_counter / (buz->cycle_period / 2);
+    if(i%2 == 0 || i > (cycles / 2) - 1) {
+        buzzerOFF(buz);
+    } else {
+        buzzerON(buz);
+    }
 }
