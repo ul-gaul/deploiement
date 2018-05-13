@@ -1,0 +1,14 @@
+To simulate a flight on the deployment board there are multiple ways to go about it.
+
+A complex and innefficient way is to read raw altitude data from the SD card every time 
+the altitude value is needed during the test. As Arduino only suports one file openned at a 
+time and SD card read/write operations are slow, this method is slow and complex to implement. Also, the SD library functions are not suited to lookup a certain data in a huge csv file, so
+this method is also complex to implement.
+
+A more simple yet less accurate method is to use mathematical functions that replicate the 
+altitude recorded on a previous flight. This is faster since math is faster to execute than 
+memory access operations. First we need to find the functions that represent our altitude 
+data as a function of time. Using Python, we are able to compute the following functions
+for each step of the flight:
+
+
