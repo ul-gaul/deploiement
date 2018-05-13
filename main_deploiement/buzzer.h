@@ -17,10 +17,10 @@
 
 typedef struct {
     unsigned int pin;
-    unsigned int sequence_time;
-    unsigned int period;
+    unsigned int sequence_period;
+    unsigned int cycle_period;
     unsigned int sequence_begin_time;
-    unsigned int counter;
+    unsigned int time_counter;
     unsigned int current_cycle;
 } buzzer;
 

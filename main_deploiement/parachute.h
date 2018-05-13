@@ -1,6 +1,6 @@
 /*
- * Librairie pour interfacer le contrôle des matchs 
- * électroniques des parachutes.
+ * Library made to interface the control of the electronic matches controlling
+ * the deployment of the parachutes
  */
 
 #ifndef PARACHUTE_H
