@@ -31,15 +31,15 @@ enum FlightState {
 };
 
 // function declarations
-int check_parachutes(parachute* para);
+unsigned int check_parachutes(parachute* para);
 
 
 // global variables
 FlightState current_flight_state = FLIGHT_LAUNCHPAD;
 parachute para_drogue;
 parachute para_main;
+unsigned int para_state;
 buzzer state_buzzer;
-
 
 
 void setup() {
@@ -52,27 +52,31 @@ void setup() {
 void loop() {
     switch(current_flight_state) {
         case FLIGHT_LAUNCHPAD:
-            check_parachutes(&para_main, &para_drogue, &state_buzzer);
+            para_state = check_parachutes(&para_main, &para_drogue, 
+                                            &state_buzzer);
+            // TODO: check if burnout started
             break;
         case FLIGHT_BURNOUT:
-            
+            // TODO: check if burnout done
             break;
         case FLIGHT_PRE_DROGUE:
-            
+            para_state = check_parachutes(&para_main, &para_drogue, 
+                                            &state_buzzer);
+            // TODO: check if apogee reached, if so: deploy drogue
             break;
         case FLIGHT_PRE_MAIN:
-            
+            // TODO: check if altitude for main is reached, if so: deploy main
             break;
         case FLIGHT_DRIFT:
-            
+            // TODO: check that speed is at landed speed
             break;
         case FLIGHT_LANDED:
-            
+            check_parachutes(&para_main, &para_drogue, &state_buzzer);
             break;
     }
 }
 
-int check_parachutes(parachute* p_main, parachute* p_drogue, buzzer* buz) {
+unsigned int check_parachutes(parachute* p_main, parachute* p_drogue, buzzer* buz) {
     /* get states of the parachutes
      * Truth table is the following:
      *      main    drogue      global state
