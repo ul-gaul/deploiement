@@ -1,7 +1,11 @@
 /*
  * Simple interface for a buzzer. The buzzer is controlled in a binary fashion
  * by a GPIO. On a high value (3.3V), the buzzer emits a sound. On a low value
- * (0V) the buzzer is silent.
+ * (0V) the buzzer is silent. To indicate the state of the parachutes, the 
+ * buzzer will emit a number of short beeps followed by a silence. The number 
+ * of beeps corresponds to the state of the two parachutes 
+ * (see main_deploiement.ino for details) and the duration of the silence is 
+ * given by the sequence period, as the sequence is repeted constantly.
  */
 
 #ifndef BUZZER_H
