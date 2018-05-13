@@ -17,6 +17,7 @@
 #include "config_deploiement.h"
 #include "parachute.h"
 #include "buzzer.h"
+#include "sd_logger.h"
 
 
 #define TEST_MODE 0
