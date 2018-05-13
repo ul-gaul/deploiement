@@ -85,10 +85,10 @@
 #define ID_PARACHUTE_MAIN    1
 
 // Tag de l'état des parachutes
-#define TAG_PARACHUTE_BOTH        4
-#define TAG_PARACHUTE_MAIN_ONLY   3
-#define TAG_PARACHUTE_DROGUE_ONLY 2
-#define TAG_PARACHUTE_NULL        1
+#define TAG_PARACHUTE_NULL        0
+#define TAG_PARACHUTE_DROGUE_ONLY 1
+#define TAG_PARACHUTE_MAIN_ONLY   2
+#define TAG_PARACHUTE_BOTH        3
 
 //-----------------------------------------------------------------------------------
 //  Paramètres du filtre passe-bas de la fusée
