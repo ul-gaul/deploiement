@@ -66,6 +66,8 @@ void loop() {
             break;
         case FLIGHT_PRE_MAIN:
             // TODO: check if altitude for main is reached, if so: deploy main
+            para_state = check_parachutes(&para_main, &para_drogue, 
+                                          &state_buzzer);
             break;
         case FLIGHT_DRIFT:
             // TODO: check that speed is at landed speed
