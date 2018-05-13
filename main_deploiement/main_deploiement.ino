@@ -16,6 +16,7 @@
 // project libraries includes
 #include "config_deploiement.h"
 #include "parachute.h"
+#include "buzzer.h"
 
 
 #define TEST_MODE 0
@@ -29,26 +30,29 @@ enum FlightState {
     FLIGHT_LANDED
 };
 
+// function declarations
+int check_parachutes(parachute* para);
+
+
+// global variables
 FlightState current_flight_state = FLIGHT_LAUNCHPAD;
-
-
 parachute para_drogue;
 parachute para_main;
+buzzer state_buzzer;
 
-
-int check_parachutes(parachute* para);
 
 
 void setup() {
     init_parachute(&para_drogue, IO_DROGUE_CTRL, IO_DROGUE_STATE);
     init_parachute(&para_main, IO_MAIN_CTRL, IO_MAIN_STATE);
-    
+    init_buzzer(&state_buzzer, IO_BUZZER_OUT, BUZZER_TIME_BETWEEN_SEQUENCES,
+                BUZZER_CYCLE_DURATION);
 }
 
 void loop() {
     switch(current_flight_state) {
         case FLIGHT_LAUNCHPAD:
-            
+            check_parachutes(&para_main, &para_drogue, &state_buzzer);
             break;
         case FLIGHT_BURNOUT:
             
@@ -68,7 +72,7 @@ void loop() {
     }
 }
 
-int check_parachutes(parachute* p_main, parachute* p_drogue) {
+int check_parachutes(parachute* p_main, parachute* p_drogue, buzzer* buz) {
     /* get states of the parachutes
      * Truth table is the following:
      *      main    drogue      global state
@@ -77,12 +81,12 @@ int check_parachutes(parachute* p_main, parachute* p_drogue) {
      *      1       0           2
      *      1       1           3
      */
-    int main_state;
-    int drogue_state;
+    unsigned int main_state;
+    unsigned int drogue_state;
     main_state = check_connection(p_main);
     drogue_state = check_connection(p_drogue);
-    // play appropriate buzzer sequence
-    // TODO: buzzer sequence in check_parachutes function
+    // play appropriate buzzer sequence (parachute state + 1 = number of beeps)
+    execute_sequence(buz, main_state*2 + drogue_state + 1);
     // return the global parachute state
     return main_state*2 + drogue_state;
 }

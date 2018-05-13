@@ -15,7 +15,7 @@ typedef struct {
 
 void init_parachute(parachute* para, unsigned int control, unsigned int state);
 
-int check_connection(parachute* para);
+unsigned int check_connection(parachute* para);
 
 void deploy_parachute(parachute* para);
 
