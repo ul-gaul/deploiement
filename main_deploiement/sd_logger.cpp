@@ -33,3 +33,7 @@ void log_event(sdlogger_handle* logger, sd_log* log, String message) {
     logger->file_handle.println(String(log->logbuffer) + message);
     logger->file_handle.flush();
 }
+
+void close_sd_logger(sdlogger_handle* logger) {
+    logger->file_handle.close();
+}
