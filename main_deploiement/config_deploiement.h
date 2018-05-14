@@ -90,17 +90,19 @@
 #define TAG_PARACHUTE_MAIN_ONLY   2
 #define TAG_PARACHUTE_BOTH        3
 
-//-----------------------------------------------------------------------------------
-//  Paramètres du filtre passe-bas de la fusée
+//----------------------------------------------------------------------------
+// Low pass filter's parameters
 /*
- * Le filtre utilisé est un filtre éliptique passe-bas fait à l'aide de MatLab. (Fonction Ellip())
- * Les paramètres du filtre sont:
- *     N   = 3;        Ordre
- *     Wp  = 0.1;      Fréquence de coupure
+ * The filter used is an elliptical low pass filter. The equation was computed
+ * using Matlab's Ellip(() function)
+ * 
+ * The filter's parameters are:
+ *     N   = 3;        filter order
+ *     Wp  = 0.1;      cutoff frequency
  *     Rp  = 0.05;     Peak-to-peak ripple      
  *     Rst = 40;       Stopband attenuation
  * 
- * L'équation aux différences est de la forme suivante:
+ * The filter's equation is:
  *    A0*y[n] = B0*x[n] + B1*x[n-1] + B2*x[n-2] + B3*x[n-3] - A1*y[n-1] - A2*y[n-2] - A3*y[n-3]
  */
 
@@ -122,13 +124,13 @@ const float B[ALTITUDE_ARRAY_SIZE] = {
 };
 
 
-//-----------------------------------------------------------------------------------
+//----------------------------------------------------------------------------
 //  Paramètres de la boucle principale
 
 // Fréquence d'échantillonage
 #define DATA_SAMPLING_PERIOD    100000 // 100000 micro-secondes ou un fréquence de 10 Hz.
 
-//-----------------------------------------------------------------------------------
+//----------------------------------------------------------------------------
 // Breakpoint d'altitude (m) et de vitessse (m/ech) ou un echétantillion est 0,1 s
 #define BREAKPOINT_SPEED_TO_BURNOUT     3    // 30 m/s - Breakpoint pour passer du launchpad au burnout
 #define BREAKPOINT_SPEED_TO_PRE_DROGUE  3    // 30 m/s - Breakpoint pour passer du burnout au predrogue
