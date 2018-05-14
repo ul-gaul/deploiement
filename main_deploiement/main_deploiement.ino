@@ -36,8 +36,9 @@ enum FlightState {
 unsigned int check_parachutes(parachute* para);
 void init_altimeter();
 float get_altitude();
-float filter_altitude();
+float filter_altitude(float raw_alt);
 float get_speed();
+int update_log_values(sd_log* log);
 
 
 // global variables
@@ -119,13 +120,13 @@ float get_altitude() {
     return altimeter.readAltitude(groundPressure);
 }
 
-float filter_altitude() {
+float filter_altitude(float raw_alt) {
     // shift the array right
     for (int k = ALTITUDE_ARRAY_SIZE; k > 0; k--){        
         raw_altitude_array[k] = raw_altitude_array[k - 1];
         filtered_altitude_array[k] = filtered_altitude_array[k - 1];
     }
-    raw_altitude_array[0] = 0;
+    raw_altitude_array[0] = raw_alt;
     filtered_altitude_array[0] = 0;
     // apply the filter
     for(int i = 0; i < ALTITUDE_ARRAY_SIZE; i++) {
@@ -142,4 +143,20 @@ float get_speed() {
     }
     speed = speed/(ALTITUDE_ARRAY_SIZE - 1);
     return (speed >= 0) ? speed : (-1) * speed;
+}
+
+int update_log_values(sd_log* log) {
+    float tmp_raw_alt = get_altitude();
+    // check that altitude is valid
+    if(tmp_raw_alt < FLIGHT_MINIMAL_ALTITUDE - 
+        ALTIMETER_INVALID_ALTITUDE_TOLERANCE || tmp_raw_alt >  
+        FLIGHT_MAXIMAL_ALTITUDE + ALTIMETER_INVALID_ALTITUDE_TOLERANCE) {
+        return -1;
+    } else {
+        log->raw_altitude = tmp_raw_alt;
+        log->filtered_altitude = filter_altitude(tmp_raw_alt);
+        log->speed = get_speed();
+    }
+    
+    return 0;
 }
