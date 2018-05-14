@@ -29,3 +29,5 @@ void init_sd_logger(sdlogger_handle* sdlogger, byte chip_select_pin,
 void log_data(sdlogger_handle* logger, sd_log* log);
 
 void log_event(sdlogger_handle* logger, sd_log* log, String message);
+
+void close_sd_logger(sdlogger_handle* logger);
