@@ -28,7 +28,7 @@ void log_data(sdlogger_handle* logger, sd_log* log) {
 }
 
 void log_event(sdlogger_handle* logger, sd_log* log, String message) {
-    sprintf(log->logbuffer, "%d,%lu,%f,%f,%f,", ID_LOG_MESSAGE, 
+    sprintf(log->logbuffer, "%d,%lu,%f,%f,%f,", ID_LOG_EVENT, 
             log->raw_altitude, log->filtered_altitude, log->speed);
     logger->file_handle.println(String(log->logbuffer) + message);
     logger->file_handle.flush();
