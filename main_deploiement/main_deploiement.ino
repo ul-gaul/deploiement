@@ -41,6 +41,8 @@ parachute para_drogue;
 parachute para_main;
 unsigned int para_state;
 buzzer state_buzzer;
+sdlogger_handle sdlogger;
+sd_log current_log;
 
 
 void setup() {
@@ -48,6 +50,7 @@ void setup() {
     init_parachute(&para_main, IO_MAIN_CTRL, IO_MAIN_STATE);
     init_buzzer(&state_buzzer, IO_BUZZER_OUT, BUZZER_TIME_BETWEEN_SEQUENCES,
                 BUZZER_CYCLE_DURATION);
+    init_sd_logger(&sdlogger, IO_SD_CS, LOG_UNIT_FILE_NAME);
 }
 
 void loop() {
