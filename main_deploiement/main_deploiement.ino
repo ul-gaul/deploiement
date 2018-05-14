@@ -22,6 +22,7 @@
 
 #define TEST_MODE 0
 
+
 enum FlightState {
     FLIGHT_LAUNCHPAD,
     FLIGHT_BURNOUT,
@@ -33,6 +34,10 @@ enum FlightState {
 
 // function declarations
 unsigned int check_parachutes(parachute* para);
+void init_altimeter();
+float get_altitude();
+float filter_altitude();
+float get_speed();
 
 
 // global variables
@@ -43,6 +48,10 @@ unsigned int para_state;
 buzzer state_buzzer;
 sdlogger_handle sdlogger;
 sd_log current_log;
+Adafruit_BMP085 altimeter;
+float groundPressure;
+float raw_altitude_array[ALTITUDE_ARRAY_SIZE];
+float filtered_altitude_array[ALTITUDE_ARRAY_SIZE];
 
 
 void setup() {
@@ -99,4 +108,38 @@ unsigned int check_parachutes(parachute* p_main, parachute* p_drogue, buzzer* bu
     execute_sequence(buz, main_state*2 + drogue_state + 1);
     // return the global parachute state
     return main_state*2 + drogue_state;
+}
+
+void init_altimeter() {
+    altimeter.begin();
+    groundPressure = altimeter.readPressure();
+}
+
+float get_altitude() {
+    return altimeter.readAltitude(groundPressure);
+}
+
+float filter_altitude() {
+    // shift the array right
+    for (int k = ALTITUDE_ARRAY_SIZE; k > 0; k--){        
+        raw_altitude_array[k] = raw_altitude_array[k - 1];
+        filtered_altitude_array[k] = filtered_altitude_array[k - 1];
+    }
+    raw_altitude_array[0] = 0;
+    filtered_altitude_array[0] = 0;
+    // apply the filter
+    for(int i = 0; i < ALTITUDE_ARRAY_SIZE; i++) {
+        filtered_altitude_array[0] += (B[i]*raw_altitude_array[i] - 
+        A[i]*filtered_altitude_array[i]);
+    }
+    return filtered_altitude_array[0];
+}
+
+float get_speed() {
+    float speed = 0;
+    for(int i = 0; i < ALTITUDE_ARRAY_SIZE - 1; i++) {
+        speed += (filtered_altitude_array[i] - filtered_altitude_array[i + 1]);
+    }
+    speed = speed/(ALTITUDE_ARRAY_SIZE - 1);
+    return (speed >= 0) ? speed : (-1) * speed;
 }
