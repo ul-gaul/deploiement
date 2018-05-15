@@ -60,6 +60,7 @@ float filtered_altitude_array[ALTITUDE_ARRAY_SIZE];
 
 void setup() {
     altitude_up_to_date = 0;
+    current_log.max_altitude = 0;
     Timer1.initialize(DATA_SAMPLING_PERIOD);
     Timer1.attachInterrupt(request_altitude_update);
     init_parachute(&para_drogue, IO_DROGUE_CTRL, IO_DROGUE_STATE);
@@ -189,6 +190,9 @@ int update_log_values(sd_log* log) {
     } else {
         log->raw_altitude = tmp_raw_alt;
         log->filtered_altitude = filter_altitude(tmp_raw_alt);
+        if(log->filtered_altitude > log->max_altitude) {
+            log->max_altitude = log->filtered_altitude;
+        }
         log->speed = get_speed();
     }
     return 0;
