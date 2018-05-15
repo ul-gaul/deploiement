@@ -12,7 +12,7 @@
 typedef struct {
     byte cspin;
     File file_handle;
-    char logfilename[256];
+    char logfilename[512];
 } sdlogger_handle;
 
 
