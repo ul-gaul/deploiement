@@ -12,6 +12,7 @@
 #include <SPI.h>
 #include <Wire.h>
 #include <SD.h>
+#include <TimerOne.h>
 
 // project libraries includes
 #include "config_deploiement.h"
@@ -33,6 +34,7 @@ enum FlightState {
 };
 
 // function declarations
+void request_altitude_update();
 unsigned int check_parachutes(parachute* para);
 void init_altimeter();
 float get_altitude();
@@ -42,6 +44,7 @@ int update_log_values(sd_log* log);
 
 
 // global variables
+int altitude_up_to_date;
 FlightState current_flight_state = FLIGHT_LAUNCHPAD;
 parachute para_drogue;
 parachute para_main;
@@ -56,6 +59,9 @@ float filtered_altitude_array[ALTITUDE_ARRAY_SIZE];
 
 
 void setup() {
+    altitude_up_to_date = 0;
+    Timer1.initialize(DATA_SAMPLING_PERIOD);
+    Timer1.attachInterrupt(request_altitude_update);
     init_parachute(&para_drogue, IO_DROGUE_CTRL, IO_DROGUE_STATE);
     init_parachute(&para_main, IO_MAIN_CTRL, IO_MAIN_STATE);
     init_buzzer(&state_buzzer, IO_BUZZER_OUT, BUZZER_TIME_BETWEEN_SEQUENCES,
@@ -64,35 +70,63 @@ void setup() {
 }
 
 void loop() {
-    switch(current_flight_state) {
-        case FLIGHT_LAUNCHPAD:
-            para_state = check_parachutes(&para_main, &para_drogue, 
-                                            &state_buzzer);
-            // TODO: check if burnout started
-            break;
-        case FLIGHT_BURNOUT:
-            // TODO: check if burnout done
-            break;
-        case FLIGHT_PRE_DROGUE:
-            para_state = check_parachutes(&para_main, &para_drogue, 
-                                            &state_buzzer);
-            // TODO: check if apogee reached, if so: deploy drogue
-            break;
-        case FLIGHT_PRE_MAIN:
-            // TODO: check if altitude for main is reached, if so: deploy main
-            para_state = check_parachutes(&para_main, &para_drogue, 
-                                          &state_buzzer);
-            break;
-        case FLIGHT_DRIFT:
-            // TODO: check that speed is at landed speed
-            break;
-        case FLIGHT_LANDED:
-            check_parachutes(&para_main, &para_drogue, &state_buzzer);
-            break;
+    if(!altitude_up_to_date) {
+        // update altitude and other data in the current log
+        if(update_log_values(&current_log) == -1) {
+            // invalid altitude, log the event
+            String event = String("Invalid Altitude");
+            log_event(&sdlogger, &current_log, event);
+        } else {
+            // follow flight plan
+            switch(current_flight_state) {
+                case FLIGHT_LAUNCHPAD:
+                    para_state = check_parachutes(&para_main, &para_drogue, 
+                                                  &state_buzzer);
+                    // check if burnout started
+                    if((current_log.speed > BREAKPOINT_SPEED_TO_BURNOUT) &&
+                        (current_log.filtered_altitude > 
+                        BREAKPOINT_ALTITUDE_TO_BURNOUT)) {
+                        String event = String(MESSAGE_BURNOUT_STARTED);
+                        log_event(&sdlogger, &current_log, event);
+                        current_flight_state = FLIGHT_BURNOUT;
+                    }
+                    break;
+                case FLIGHT_BURNOUT:
+                    // check if burnout done
+                    if(current_log.speed < BREAKPOINT_SPEED_TO_PRE_DROGUE) {
+                        String event = String(MESSAGE_BURNOUT_FINISHED);
+                        log_event(&sdlogger, &current_log, event);
+                        current_flight_state = FLIGHT_PRE_DROGUE;
+                    }
+                    break;
+                case FLIGHT_PRE_DROGUE:
+                    para_state = check_parachutes(&para_main, &para_drogue, 
+                                                  &state_buzzer);
+                    // TODO: check if apogee reached, if so: deploy drogue
+                    break;
+                case FLIGHT_PRE_MAIN:
+                    // TODO: check if altitude for main is reached, if so: deploy main
+                    para_state = check_parachutes(&para_main, &para_drogue, 
+                                                  &state_buzzer);
+                    break;
+                case FLIGHT_DRIFT:
+                    // TODO: check that speed is at landed speed
+                    break;
+                case FLIGHT_LANDED:
+                    check_parachutes(&para_main, &para_drogue, &state_buzzer);
+                    break;
+            }
+        }
+        altitude_up_to_date = 1;
     }
 }
 
-unsigned int check_parachutes(parachute* p_main, parachute* p_drogue, buzzer* buz) {
+void request_altitude_update() {
+    altitude_up_to_date = 0;
+}
+
+unsigned int check_parachutes(parachute* p_main, parachute* p_drogue, 
+                              buzzer* buz) {
     /* get states of the parachutes
      * Truth table is the following:
      *      main    drogue      global state
@@ -157,6 +191,5 @@ int update_log_values(sd_log* log) {
         log->filtered_altitude = filter_altitude(tmp_raw_alt);
         log->speed = get_speed();
     }
-    
     return 0;
 }
