@@ -21,14 +21,14 @@ void init_sd_logger(sdlogger_handle* sdlogger, byte chip_select_pin,
 }
 
 void log_data(sdlogger_handle* logger, sd_log* log) {
-    sprintf(log->logbuffer, "%d,%lu,%f,%f,%f", ID_LOG_MESSAGE, 
+    sprintf(log->logbuffer, "%d,%lu,%f,%f,%f", ID_LOG_MESSAGE, millis(),
             log->raw_altitude, log->filtered_altitude, log->speed);
     logger->file_handle.println(String(log->logbuffer));
     logger->file_handle.flush();
 }
 
 void log_event(sdlogger_handle* logger, sd_log* log, String message) {
-    sprintf(log->logbuffer, "%d,%lu,%f,%f,%f,", ID_LOG_EVENT, 
+    sprintf(log->logbuffer, "%d,%lu,%f,%f,%f,", ID_LOG_EVENT, millis(),
             log->raw_altitude, log->filtered_altitude, log->speed);
     logger->file_handle.println(String(log->logbuffer) + message);
     logger->file_handle.flush();
