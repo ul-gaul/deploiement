@@ -20,6 +20,7 @@ typedef struct {
     char logbuffer[512];
     float raw_altitude;
     float filtered_altitude;
+    float max_altitude;
     float speed;
 } sd_log;
 
