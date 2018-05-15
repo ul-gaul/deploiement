@@ -45,6 +45,7 @@ int update_log_values(sd_log* log);
 
 // global variables
 int altitude_up_to_date;
+unsigned int count_apogee;
 FlightState current_flight_state = FLIGHT_LAUNCHPAD;
 parachute para_drogue;
 parachute para_main;
@@ -61,6 +62,7 @@ float filtered_altitude_array[ALTITUDE_ARRAY_SIZE];
 void setup() {
     altitude_up_to_date = 0;
     current_log.max_altitude = 0;
+    count_apogee = 0;
     Timer1.initialize(DATA_SAMPLING_PERIOD);
     Timer1.attachInterrupt(request_altitude_update);
     init_parachute(&para_drogue, IO_DROGUE_CTRL, IO_DROGUE_STATE);
@@ -103,18 +105,45 @@ void loop() {
                 case FLIGHT_PRE_DROGUE:
                     para_state = check_parachutes(&para_main, &para_drogue, 
                                                   &state_buzzer);
-                    // TODO: check if apogee reached, if so: deploy drogue
+                    // check if apogee reached, if so: deploy drogue
+                    if(count_apogee >= BREAKPOINT_DELTA_TIME_APOGEE) {
+                        if(para_state == TAG_PARACHUTE_NULL || 
+                            para_state == TAG_PARACHUTE_MAIN_ONLY) {
+                            String event = String(MESSAGE_DROGUE_ALREADY_OUT);
+                            log_event(&sdlogger, &current_log, event);
+                        }
+                        deploy_parachute(&para_drogue);
+                        String event = String(MESSAGE_DROGUE_OUT);
+                        log_event(&sdlogger, &current_log, event);
+                        current_flight_state = FLIGHT_PRE_MAIN;
+                    }
                     break;
                 case FLIGHT_PRE_MAIN:
-                    // TODO: check if altitude for main is reached, if so: deploy main
+                    // check if altitude for main is reached, if so: deploy main
                     para_state = check_parachutes(&para_main, &para_drogue, 
                                                   &state_buzzer);
+                    if(current_log.filtered_altitude < BREAKPOINT_ALTITUDE_TO_DRIFT) {
+                        if(para_state == TAG_PARACHUTE_NULL) {
+                            String event = String(MESSAGE_MAIN_ALREADY_OUT);
+                            log_event(&sdlogger, &current_log, event);
+                        }
+                        deploy_parachute(&para_main);
+                        String event = String(MESSAGE_MAIN_OUT);
+                        log_event(&sdlogger, &current_log, event);
+                        current_flight_state = FLIGHT_DRIFT;
+                    }
                     break;
                 case FLIGHT_DRIFT:
-                    // TODO: check that speed is at landed speed
+                    // check that speed is at landed speed
+                    if(current_log.speed < BREAKPOINT_SPEED_TO_IDLE) {
+                        String event = String(MESSAGE_FLIGHT_FINISHED);
+                        log_event(&sdlogger, &current_log, event);
+                        current_flight_state = FLIGHT_LANDED;
+                    }
                     break;
                 case FLIGHT_LANDED:
-                    check_parachutes(&para_main, &para_drogue, &state_buzzer);
+                    para_state = check_parachutes(&para_main, &para_drogue,
+                                                  &state_buzzer);
                     break;
             }
         }
@@ -192,6 +221,9 @@ int update_log_values(sd_log* log) {
         log->filtered_altitude = filter_altitude(tmp_raw_alt);
         if(log->filtered_altitude > log->max_altitude) {
             log->max_altitude = log->filtered_altitude;
+            count_apogee = 0;
+        } else {
+            count_apogee++;
         }
         log->speed = get_speed();
     }
