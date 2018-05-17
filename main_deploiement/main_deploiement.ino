@@ -21,7 +21,7 @@
 #include "sd_logger.h"
 
 
-#define TEST_MODE 0
+#define TEST_MODE 1
 
 
 enum FlightState {
@@ -41,6 +41,7 @@ float get_altitude();
 float filter_altitude(float raw_alt);
 float get_speed();
 int update_log_values(sd_log* log);
+float get_simulation_altitude();
 
 
 // global variables
@@ -210,7 +211,12 @@ float get_speed() {
 }
 
 int update_log_values(sd_log* log) {
-    float tmp_raw_alt = get_altitude();
+    float tmp_raw_alt;
+    if(TEST_MODE) {
+        tmp_raw_alt = get_simulation_altitude();
+    } else {
+        tmp_raw_alt = get_altitude();
+    }
     // check that altitude is valid
     if(tmp_raw_alt < FLIGHT_MINIMAL_ALTITUDE - 
         ALTIMETER_INVALID_ALTITUDE_TOLERANCE || tmp_raw_alt >  
@@ -228,4 +234,30 @@ int update_log_values(sd_log* log) {
         log->speed = get_speed();
     }
     return 0;
+}
+
+float get_simulation_altitude() {
+    unsigned long t = millis();
+    float a;
+    switch(current_flight_state) {
+        case FLIGHT_LAUNCHPAD:
+            a = 3.3652486731274 * pow(10, -5) * t - 36.7480814262348;
+            break;
+        case FLIGHT_BURNOUT:
+            a = -1.76590766247618 * pow(10, -24) * pow(t, 6) + 8.21927550877778 * pow(10, -18) * pow(t, 5) - 1.19590054179482 * pow(10, -11) * pow(t, 4) + 1.91561566553478 * pow(10, -8) * pow(t, 3) + 16.1525398681442 * pow(t, 2) - 15040829.1945499 * t + 4375213557377.89;
+            break;
+        case FLIGHT_PRE_DROGUE:
+            a = -1.5457129719176 * pow(10, -14) * pow(t, -14) * pow(t, 4) + 7.24545784288163 * pow(10, -8) * pow(t, 3) - 0.127364532697129 * pow(t, 2) + 99509.1917079862*t - 29155720076.6889;
+            break;
+        case FLIGHT_PRE_MAIN:
+            a = 2.17265359742678 * pow(10, -8) * pow(t, 2) - 0.0775242158258977*t + 63700.4236312681;
+            break;
+        case FLIGHT_DRIFT:
+            a = -9.91894989006869 * pow(10, -13) * pow(t, 3) + 3.87539476072685 * pow(10, -6) * pow(t, 2) - 5.05446060081143*t + 2200684.64709215;
+            break;
+        case FLIGHT_LANDED:
+            a = -1.5;
+            break;
+    }
+    return a;
 }

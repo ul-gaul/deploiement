@@ -50,7 +50,7 @@ if __name__ == '__main__':
     # compute fitting polynomial curves
     xlaunchpad = array_launchpad[:,0]
     ylaunchpad = array_launchpad[:,1]
-    zlaunchpad = polyfit(xlaunchpad, ylaunchpad, 2)
+    zlaunchpad = polyfit(xlaunchpad, ylaunchpad, 1)
     curvelaunchpad = poly1d(zlaunchpad)
     xfitlaunchpad = linspace(xlaunchpad[0], xlaunchpad[-1], 50)
     yfitlaunchpad = curvelaunchpad(xfitlaunchpad)
@@ -64,21 +64,21 @@ if __name__ == '__main__':
     
     xpredrogue = array_predrogue[:,0]
     ypredrogue = array_predrogue[:,1]
-    zpredrogue = polyfit(xpredrogue, ypredrogue, 5)
+    zpredrogue = polyfit(xpredrogue, ypredrogue, 4)
     curvepredrogue = poly1d(zpredrogue)
     xfitpredrogue = linspace(xpredrogue[0], xpredrogue[-1], 50)
     yfitpredrogue = curvepredrogue(xfitpredrogue)
     
     xpremain = array_premain[:,0]
     ypremain = array_premain[:,1]
-    zpremain = polyfit(xpremain, ypremain, 3)
+    zpremain = polyfit(xpremain, ypremain, 2)
     curvepremain = poly1d(zpremain)
     xfitpremain = linspace(xpremain[0], xpremain[-1], 50)
     yfitpremain = curvepremain(xfitpremain)
     
     xdrift = array_drift[:,0]
     ydrift = array_drift[:,1]
-    zdrift = polyfit(xdrift, ydrift, 7)
+    zdrift = polyfit(xdrift, ydrift, 3)
     curvedrift = poly1d(zdrift)
     xfitdrift = linspace(xdrift[0], xdrift[-1], 50)
     yfitdrift = curvedrift(xfitdrift)
