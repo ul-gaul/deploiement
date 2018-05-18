@@ -17,7 +17,7 @@ from sympy import Symbol, expand
 
 # flight step delimiters
 launchpad_start = 11351     # timestamp = 1135062
-burnout_start = 11507       # timestamp = 1152090
+burnout_start = 11512       # timestamp = 1152062
 predrogue_start = 11724     # timestamp = 1172178
 premain_start = 11757       # timestamp = 1175762
 drift_start = 12603         # timestamp = 1260062
@@ -32,7 +32,7 @@ if __name__ == '__main__':
         plots = csv.reader(csvfile, delimiter = ',')
         next(plots)     # skip header
         for row in plots:
-            timestamp.append(int(row[1]))
+            timestamp.append(int(row[1]) - 1135062)
             altitude.append(float(row[2]))
     
     # build numpy arrays of data
