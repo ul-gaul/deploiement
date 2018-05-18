@@ -61,6 +61,8 @@ float filtered_altitude_array[ALTITUDE_ARRAY_SIZE];
 
 
 void setup() {
+    Serial.begin(9600);
+    Serial.println("allo");
     altitude_up_to_date = 0;
     current_log.max_altitude = 0;
     count_apogee = 0;
@@ -71,6 +73,7 @@ void setup() {
     init_buzzer(&state_buzzer, IO_BUZZER_OUT, BUZZER_TIME_BETWEEN_SEQUENCES,
                 BUZZER_CYCLE_DURATION);
     init_sd_logger(&sdlogger, IO_SD_CS, LOG_UNIT_FILE_NAME);
+    Serial.println("setup fini");
 }
 
 void loop() {
@@ -241,19 +244,42 @@ float get_simulation_altitude() {
     float a;
     switch(current_flight_state) {
         case FLIGHT_LAUNCHPAD:
-            a = 3.3652486731274 * pow(10, -5) * t - 36.7480814262348;
+            if(t > 16000) {
+                a = -1.49350189856461 * pow(10, -14) * pow(t, 4) + 2.19414872603138 * pow(10, -9) * pow(t, 3) - 0.000125097528935285 * pow(t, 2) + 3.29683601045748*t - 31354.7202506453;
+            } else {
+                a = 4.24130141489228 * pow(10, -5) * t + 1.40090814584814;
+            }
             break;
         case FLIGHT_BURNOUT:
-            a = -1.76590766247618 * pow(10, -24) * pow(t, 6) + 8.21927550877778 * pow(10, -18) * pow(t, 5) - 1.19590054179482 * pow(10, -11) * pow(t, 4) + 1.91561566553478 * pow(10, -8) * pow(t, 3) + 16.1525398681442 * pow(t, 2) - 15040829.1945499 * t + 4375213557377.89;
+            if(t > 37200) {
+                a = -1.49350189856461 * pow(10, -14) * pow(t, 4) + 2.19414872603138 * pow(10, -9) * pow(t, 3) - 0.000125097528935285 * pow(t, 2) + 3.29683601045748 * t - 31354.7202506453;
+            } else {
+                a = 3.4932435120246 * pow(10, -22) * pow(t, 6) - 6.0137525133258 * pow(10, -17) * pow(t, 5) + 4.27325583289267 * pow(10, -12) * pow(t, 4) - 1.60300051943013 * pow(10, -7) * pow(t, 3) + 0.00333952376594387 * pow(t, 2) - 36.3492749029025 * t + 160449.656477025;
+            }
             break;
         case FLIGHT_PRE_DROGUE:
-            a = -1.5457129719176 * pow(10, -14) * pow(t, -14) * pow(t, 4) + 7.24545784288163 * pow(10, -8) * pow(t, 3) - 0.127364532697129 * pow(t, 2) + 99509.1917079862*t - 29155720076.6889;
+            if(t > 40500) {
+                // simulate next step
+                a = 2.172653597427 * pow(10, -8) * pow(t, 2) - 0.0282022850738493 * t + 3697.35684913407;
+            } else {
+                a = -1.49350189856461 * pow(10, -14) * pow(t, 4) + 2.19414872603138 * pow(10, -9) * pow(t, 3) - 0.000125097528935285 * pow(t, 2) + 3.29683601045748*t - 31354.7202506453;
+            }
             break;
         case FLIGHT_PRE_MAIN:
-            a = 2.17265359742678 * pow(10, -8) * pow(t, 2) - 0.0775242158258977*t + 63700.4236312681;
+            if(t > 125100) {
+                // simulate next step
+                a = a = -9.91894988952945 * pow(10, -13) * pow(t, 3) + 4.97807830666201 * pow(10, -6) * pow(t, 2) - 0.0906045209884312 * t + 5961.90970204993;
+            } else {
+                a = 2.172653597427 * pow(10, -8) * pow(t, 2) - 0.0282022850738493 * t + 3697.35684913407;
+            }
             break;
         case FLIGHT_DRIFT:
-            a = -9.91894989006869 * pow(10, -13) * pow(t, 3) + 3.87539476072685 * pow(10, -6) * pow(t, 2) - 5.05446060081143*t + 2200684.64709215;
+            if(t > 180000) {
+                // simulate next step
+                a = -1.5;
+            } else {
+                a = -9.91894988952945 * pow(10, -13) * pow(t, 3) + 4.97807830666201 * pow(10, -6) * pow(t, 2) - 0.0906045209884312 * t + 5961.90970204993;
+            }
             break;
         case FLIGHT_LANDED:
             a = -1.5;
