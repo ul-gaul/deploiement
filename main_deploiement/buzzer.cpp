@@ -3,11 +3,11 @@
 
 // private functions
 void buzzerON(buzzer* buz) {
-    digitalWrite(buz->pin, HIGH);
+    analogWrite(buz->pin, 255);
 }
 
 void buzzerOFF(buzzer* buz) {
-    digitalWrite(buz->pin, LOW);
+    analogWrite(buz->pin, 0);
 }
 
 // public functions

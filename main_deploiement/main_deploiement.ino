@@ -21,7 +21,7 @@
 #include "sd_logger.h"
 
 
-#define TEST_MODE 1
+#define TEST_MODE 0
 
 
 enum FlightState {
@@ -61,19 +61,21 @@ float filtered_altitude_array[ALTITUDE_ARRAY_SIZE];
 
 
 void setup() {
-    Serial.begin(9600);
-    Serial.println("allo");
+    // init buzzer
+    init_buzzer(&state_buzzer, IO_BUZZER_OUT, BUZZER_TIME_BETWEEN_SEQUENCES,
+                BUZZER_CYCLE_DURATION);
+    // init data related variables
     altitude_up_to_date = 0;
     current_log.max_altitude = 0;
     count_apogee = 0;
+    // attach interrupt to altitude update function
     Timer1.initialize(DATA_SAMPLING_PERIOD);
     Timer1.attachInterrupt(request_altitude_update);
+    // init parachutes
     init_parachute(&para_drogue, IO_DROGUE_CTRL, IO_DROGUE_STATE);
     init_parachute(&para_main, IO_MAIN_CTRL, IO_MAIN_STATE);
-    init_buzzer(&state_buzzer, IO_BUZZER_OUT, BUZZER_TIME_BETWEEN_SEQUENCES,
-                BUZZER_CYCLE_DURATION);
+    // init sd card
     init_sd_logger(&sdlogger, IO_SD_CS, LOG_UNIT_FILE_NAME);
-    Serial.println("setup fini");
 }
 
 void loop() {
