@@ -73,8 +73,8 @@
 //  Buzzer
 
 // Paramètres du signal sonore
-#define BUZZER_TIME_BETWEEN_SEQUENCES 6000
-#define BUZZER_CYCLE_DURATION         1000
+#define BUZZER_TIME_BETWEEN_SEQUENCES 4000
+#define BUZZER_CYCLE_DURATION         500
 
 
 //-----------------------------------------------------------------------------------

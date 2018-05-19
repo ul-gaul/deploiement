@@ -25,7 +25,6 @@ typedef struct {
     unsigned int cycle_period;
     unsigned int sequence_begin_time;
     unsigned int time_counter;
-    unsigned int current_state;
 } buzzer;
 
 

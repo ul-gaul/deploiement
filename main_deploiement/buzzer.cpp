@@ -25,12 +25,10 @@ void init_buzzer(buzzer* buz, unsigned int p_pin, unsigned int p_sequence_period
     buz->sequence_begin_time = 0;
     // initialize sequence time counter
     buz->time_counter = 0;
-    // initialize current cycle
-    buz->current_state = 0;
 }
 
 void execute_sequence(buzzer* buz, unsigned int cycles) {
-    unsigned int timenow = millis();
+    unsigned long timenow = millis();
     buz->time_counter = timenow - buz->sequence_begin_time;
     // check if this is the start of a new sequence
     if(buz->time_counter >= buz->sequence_period) {
@@ -41,7 +39,7 @@ void execute_sequence(buzzer* buz, unsigned int cycles) {
     // compute the current state the buzzer should be in and change the output
     // of the buzzer's control pin accordingly
     unsigned int i = buz->time_counter / (buz->cycle_period / 2);
-    if(i%2 == 0 || i > (cycles / 2) - 1) {
+    if(i % 2 == 0 || i > (cycles * 2) - 1) {
         buzzerOFF(buz);
     } else {
         buzzerON(buz);
