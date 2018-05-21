@@ -52,7 +52,7 @@ parachute para_drogue;
 parachute para_main;
 unsigned int para_state;
 buzzer state_buzzer;
-// sdlogger_handle sdlogger;
+sdlogger_handle sdlogger;
 sd_log current_log;
 Adafruit_BMP085 altimeter;
 float groundPressure;
@@ -75,11 +75,37 @@ void setup() {
     init_parachute(&para_drogue, IO_DROGUE_CTRL, IO_DROGUE_STATE);
     init_parachute(&para_main, IO_MAIN_CTRL, IO_MAIN_STATE);
     // init sd card
-//     init_sd_logger(&sdlogger, IO_SD_CS, LOG_UNIT_FILE_NAME);
+    for(int i = 0; i < 10; i++) {
+        buzzerON(&state_buzzer);
+        delay(100);
+        buzzerOFF(&state_buzzer);
+        delay(100);
+    }
+    delay(500);
+    while(1) {
+        int sderror = init_sd_logger(&sdlogger, IO_SD_CS, LOG_UNIT_FILE_NAME);
+        if(sderror != 0) {
+            for(int i = 0; i < sderror; i++) {
+                buzzerON(&state_buzzer);
+                delay(100);
+                buzzerOFF(&state_buzzer);
+                delay(100);
+            }
+            delay(500);
+        } else {
+            break;
+        }
+    }
 }
 
 void loop() {
 //     check_parachutes(&para_main, &para_drogue, &state_buzzer);
+    for(int i = 0; i < 8; i++) {
+        buzzerON(&state_buzzer);
+        delay(100);
+        buzzerOFF(&state_buzzer);
+        delay(100);
+    }
     if(!altitude_up_to_date) {
         // update altitude and other data in the current log
         if(update_log_values(&current_log) == -1) {

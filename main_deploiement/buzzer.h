@@ -27,6 +27,9 @@ typedef struct {
     unsigned int time_counter;
 } buzzer;
 
+void buzzerON(buzzer* buz);
+
+void buzzerOFF(buzzer* buz);
 
 void init_buzzer(buzzer* buz, unsigned int p_pin, unsigned int p_sequence_time,
     unsigned int p_period);

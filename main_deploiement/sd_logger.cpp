@@ -1,8 +1,10 @@
 #include "sd_logger.h"
 
-void init_sd_logger(sdlogger_handle* sdlogger, byte chip_select_pin, 
+int init_sd_logger(sdlogger_handle* sdlogger, byte chip_select_pin, 
                     char* logfilename) {
-    SD.begin(chip_select_pin);
+    if(SD.begin(10) != true) {
+        return 5;
+    }
     sdlogger->cspin = chip_select_pin;
     // generate filename, credit goes to Jonathan Neault for the algorithm
     for(int i = 1; i <= LOG_UNIT_MAX_NB_OF_FILES; i++) {
@@ -13,11 +15,15 @@ void init_sd_logger(sdlogger_handle* sdlogger, byte chip_select_pin,
         }
     }
     sdlogger->file_handle = SD.open(sdlogger->logfilename, FILE_WRITE);
+    if(!sdlogger->file_handle) {
+        return 3;
+    }
     // write header of file, need to use the String type since Arduino's 
     // println function does not support char arrays
     String header = String(ID_LOG_MESSAGE) + 
             String(",timestamp,rawAltitude,filteredAltitude,speed,message");
     sdlogger->file_handle.println(header);
+    return 0;
 }
 
 void log_data(sdlogger_handle* logger, sd_log* log) {

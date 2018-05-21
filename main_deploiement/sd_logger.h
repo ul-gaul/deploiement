@@ -24,7 +24,7 @@ typedef struct {
     float speed;
 } sd_log;
 
-void init_sd_logger(sdlogger_handle* sdlogger, byte chip_select_pin, 
+int init_sd_logger(sdlogger_handle* sdlogger, byte chip_select_pin, 
                     char* logfilename);
 
 void log_data(sdlogger_handle* logger, sd_log* log);
