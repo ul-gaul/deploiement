@@ -75,13 +75,14 @@ void setup() {
     init_parachute(&para_drogue, IO_DROGUE_CTRL, IO_DROGUE_STATE);
     init_parachute(&para_main, IO_MAIN_CTRL, IO_MAIN_STATE);
     // init sd card
-    for(int i = 0; i < 10; i++) {
-        buzzerON(&state_buzzer);
-        delay(100);
-        buzzerOFF(&state_buzzer);
-        delay(100);
-    }
-    delay(500);
+//     for(int i = 0; i < 10; i++) {
+//         buzzerON(&state_buzzer);
+//         delay(100);
+//         buzzerOFF(&state_buzzer);
+//         delay(100);
+//     }
+//     delay(500);
+    pinMode(10, OUTPUT);
     while(1) {
         int sderror = init_sd_logger(&sdlogger, IO_SD_CS, LOG_UNIT_FILE_NAME);
         if(sderror != 0) {
@@ -96,16 +97,46 @@ void setup() {
             break;
         }
     }
-}
-
-void loop() {
-//     check_parachutes(&para_main, &para_drogue, &state_buzzer);
-    for(int i = 0; i < 8; i++) {
+//     while(!SD.begin(IO_SD_CS)) {
+//         for(int i = 0; i < 5; i++) {
+//             buzzerON(&state_buzzer);
+//             delay(100);
+//             buzzerOFF(&state_buzzer);
+//             delay(100);
+//         }
+//         delay(500);
+//     }
+    for(int i = 0; i < 4; i++) {
         buzzerON(&state_buzzer);
         delay(100);
         buzzerOFF(&state_buzzer);
         delay(100);
     }
+    delay(500);
+    for(int i = 0; i < 2; i++) {
+        buzzerON(&state_buzzer);
+        delay(100);
+        buzzerOFF(&state_buzzer);
+        delay(100);
+    }
+    delay(500);
+    for(int i = 0; i < 4; i++) {
+        buzzerON(&state_buzzer);
+        delay(100);
+        buzzerOFF(&state_buzzer);
+        delay(100);
+    }
+    delay(500);
+    for(int i = 0; i < 2; i++) {
+        buzzerON(&state_buzzer);
+        delay(100);
+        buzzerOFF(&state_buzzer);
+        delay(100);
+    }
+}
+
+void loop() {
+//     check_parachutes(&para_main, &para_drogue, &state_buzzer);
     if(!altitude_up_to_date) {
         // update altitude and other data in the current log
         if(update_log_values(&current_log) == -1) {
