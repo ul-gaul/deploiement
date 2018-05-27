@@ -75,64 +75,21 @@ void setup() {
     init_parachute(&para_drogue, IO_DROGUE_CTRL, IO_DROGUE_STATE);
     init_parachute(&para_main, IO_MAIN_CTRL, IO_MAIN_STATE);
     // init sd card
-//     for(int i = 0; i < 10; i++) {
-//         buzzerON(&state_buzzer);
-//         delay(100);
-//         buzzerOFF(&state_buzzer);
-//         delay(100);
-//     }
-//     delay(500);
-    pinMode(10, OUTPUT);
-    while(1) {
-        int sderror = init_sd_logger(&sdlogger, IO_SD_CS, LOG_UNIT_FILE_NAME);
-        if(sderror != 0) {
-            for(int i = 0; i < sderror; i++) {
-                buzzerON(&state_buzzer);
-                delay(100);
-                buzzerOFF(&state_buzzer);
-                delay(100);
-            }
-            delay(500);
-        } else {
-            break;
-        }
-    }
-//     while(!SD.begin(IO_SD_CS)) {
-//         for(int i = 0; i < 5; i++) {
-//             buzzerON(&state_buzzer);
-//             delay(100);
-//             buzzerOFF(&state_buzzer);
-//             delay(100);
+//     pinMode(10, OUTPUT);
+//     while(1) {
+//         int sderror = init_sd_logger(&sdlogger, IO_SD_CS, LOG_UNIT_FILE_NAME);
+//         if(sderror != 0) {
+//             for(int i = 0; i < sderror; i++) {
+//                 buzzerON(&state_buzzer);
+//                 delay(100);
+//                 buzzerOFF(&state_buzzer);
+//                 delay(100);
+//             }
+//             delay(500);
+//         } else {
+//             break;
 //         }
-//         delay(500);
 //     }
-    for(int i = 0; i < 4; i++) {
-        buzzerON(&state_buzzer);
-        delay(100);
-        buzzerOFF(&state_buzzer);
-        delay(100);
-    }
-    delay(500);
-    for(int i = 0; i < 2; i++) {
-        buzzerON(&state_buzzer);
-        delay(100);
-        buzzerOFF(&state_buzzer);
-        delay(100);
-    }
-    delay(500);
-    for(int i = 0; i < 4; i++) {
-        buzzerON(&state_buzzer);
-        delay(100);
-        buzzerOFF(&state_buzzer);
-        delay(100);
-    }
-    delay(500);
-    for(int i = 0; i < 2; i++) {
-        buzzerON(&state_buzzer);
-        delay(100);
-        buzzerOFF(&state_buzzer);
-        delay(100);
-    }
 }
 
 void loop() {
@@ -208,6 +165,12 @@ void loop() {
                 case FLIGHT_LANDED:
                     para_state = check_parachutes(&para_main, &para_drogue,
                                                   &state_buzzer);
+                    for(int i = 0; i < 10; i++) {
+                        buzzerON(&state_buzzer);
+                        delay(100);
+                        buzzerOFF(&state_buzzer);
+                        delay(100);
+                    }
                     break;
             }
         }
@@ -305,7 +268,7 @@ float get_simulation_altitude() {
     switch(current_flight_state) {
         case FLIGHT_LAUNCHPAD:
             if(t > 16000) {
-                a = -1.49350189856461 * pow(10, -14) * pow(t, 4) + 2.19414872603138 * pow(10, -9) * pow(t, 3) - 0.000125097528935285 * pow(t, 2) + 3.29683601045748*t - 31354.7202506453;
+                a = 3.4932435120246 * pow(10, -22) * pow(t, 6) - 6.0137525133258 * pow(10, -17) * pow(t, 5) + 4.27325583289267 * pow(10, -12) * pow(t, 4) - 1.60300051943013 * pow(10, -7) * pow(t, 3) + 0.00333952376594387 * pow(t, 2) - 36.3492749029025 * t + 160449.656477025;
             } else {
                 a = 4.24130141489228 * pow(10, -5) * t + 1.40090814584814;
             }
@@ -336,13 +299,14 @@ float get_simulation_altitude() {
         case FLIGHT_DRIFT:
             if(t > 180000) {
                 // simulate next step
-                a = -1.5;
+                a = 0;
             } else {
                 a = -9.91894988952945 * pow(10, -13) * pow(t, 3) + 4.97807830666201 * pow(10, -6) * pow(t, 2) - 0.0906045209884312 * t + 5961.90970204993;
+                a = (a >= 0) ? a : 0;
             }
             break;
         case FLIGHT_LANDED:
-            a = -1.5;
+            a = 0;
             break;
     }
     return a;
