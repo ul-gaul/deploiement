@@ -24,6 +24,18 @@ drift_start = 12603         # timestamp = 1260062
 landed_start = 13153        # timestamp = 1315062
 simulation_end = 13303      # timestamp = 1330062
 
+# flight step timestamp offsets
+burnout_offset = 1152062 - 1135062
+predrogue_offset = 1172178 - 1152062
+premain_offset = 1175762 - 1172178
+drift_offset = 1260062 - 1175762
+
+print("burnout offset =", burnout_offset)
+print("predrogue offset =", predrogue_offset)
+print("premain offset =", premain_offset)
+print("drift offset =", drift_offset)
+
+
 if __name__ == '__main__':    
     timestamp = []
     altitude = []
@@ -38,13 +50,13 @@ if __name__ == '__main__':
     # build numpy arrays of data
     array_launchpad = array(list(zip(timestamp[launchpad_start:burnout_start], 
                                      altitude[launchpad_start:burnout_start])))
-    array_burnout = array(list(zip(timestamp[burnout_start:predrogue_start], 
+    array_burnout = array(list(zip([t - burnout_offset for t in timestamp[burnout_start:predrogue_start]], 
                                      altitude[burnout_start:predrogue_start])))
-    array_predrogue = array(list(zip(timestamp[predrogue_start:premain_start], 
+    array_predrogue = array(list(zip([t - predrogue_offset for t in timestamp[predrogue_start:premain_start]], 
                                      altitude[predrogue_start:premain_start])))
-    array_premain = array(list(zip(timestamp[premain_start:drift_start], 
+    array_premain = array(list(zip([t - premain_offset for t in timestamp[premain_start:drift_start]], 
                                      altitude[premain_start:drift_start])))
-    array_drift = array(list(zip(timestamp[drift_start:landed_start], 
+    array_drift = array(list(zip([t - drift_offset for t in timestamp[drift_start:landed_start]], 
                                      altitude[drift_start:landed_start])))
     
     # compute fitting polynomial curves
@@ -57,28 +69,28 @@ if __name__ == '__main__':
     
     xburnout = array_burnout[:,0]
     yburnout = array_burnout[:,1]
-    zburnout = polyfit(xburnout, yburnout, 6)
+    zburnout = polyfit(xburnout, yburnout, 3)
     curveburnout = poly1d(zburnout)
     xfitburnout = linspace(xburnout[0], xburnout[-1], 50)
     yfitburnout = curveburnout(xfitburnout)
     
     xpredrogue = array_predrogue[:,0]
     ypredrogue = array_predrogue[:,1]
-    zpredrogue = polyfit(xpredrogue, ypredrogue, 4)
+    zpredrogue = polyfit(xpredrogue, ypredrogue, 3)
     curvepredrogue = poly1d(zpredrogue)
     xfitpredrogue = linspace(xpredrogue[0], xpredrogue[-1], 50)
     yfitpredrogue = curvepredrogue(xfitpredrogue)
     
     xpremain = array_premain[:,0]
     ypremain = array_premain[:,1]
-    zpremain = polyfit(xpremain, ypremain, 2)
+    zpremain = polyfit(xpremain, ypremain, 1)
     curvepremain = poly1d(zpremain)
     xfitpremain = linspace(xpremain[0], xpremain[-1], 50)
     yfitpremain = curvepremain(xfitpremain)
     
     xdrift = array_drift[:,0]
     ydrift = array_drift[:,1]
-    zdrift = polyfit(xdrift, ydrift, 3)
+    zdrift = polyfit(xdrift, ydrift, 1)
     curvedrift = poly1d(zdrift)
     xfitdrift = linspace(xdrift[0], xdrift[-1], 50)
     yfitdrift = curvedrift(xfitdrift)

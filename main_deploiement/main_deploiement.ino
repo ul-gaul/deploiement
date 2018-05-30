@@ -35,7 +35,8 @@ enum FlightState {
 
 // function declarations
 void request_altitude_update();
-unsigned int check_parachutes(parachute* para);
+unsigned int check_parachutes(parachute* p_main, parachute* p_drogue, 
+                              buzzer* buz);
 void init_altimeter();
 float get_altitude();
 float filter_altitude(float raw_alt);
@@ -265,6 +266,11 @@ int update_log_values(sd_log* log) {
 float get_simulation_altitude() {
     unsigned long t = millis();
     float a;
+    /*
+     * some simulations step changes are time triggered:
+     *      burnout, predrogue and landed
+     * while the others are triggered by the current step of the flight
+     */
     switch(current_flight_state) {
         case FLIGHT_LAUNCHPAD:
             if(t > 16000) {
@@ -281,20 +287,20 @@ float get_simulation_altitude() {
             }
             break;
         case FLIGHT_PRE_DROGUE:
-            if(t > 40500) {
-                // simulate next step
-                a = 2.172653597427 * pow(10, -8) * pow(t, 2) - 0.0282022850738493 * t + 3697.35684913407;
-            } else {
+//             if(t > 40500) {
+//                 // simulate next step
+//                 a = 2.172653597427 * pow(10, -8) * pow(t, 2) - 0.0282022850738493 * t + 3697.35684913407;
+//             } else {
                 a = -1.49350189856461 * pow(10, -14) * pow(t, 4) + 2.19414872603138 * pow(10, -9) * pow(t, 3) - 0.000125097528935285 * pow(t, 2) + 3.29683601045748*t - 31354.7202506453;
-            }
+//             }
             break;
         case FLIGHT_PRE_MAIN:
-            if(t > 125100) {
-                // simulate next step
-                a = a = -9.91894988952945 * pow(10, -13) * pow(t, 3) + 4.97807830666201 * pow(10, -6) * pow(t, 2) - 0.0906045209884312 * t + 5961.90970204993;
-            } else {
+//             if(t > 125100) {
+//                 // simulate next step
+//                 a = a = -9.91894988952945 * pow(10, -13) * pow(t, 3) + 4.97807830666201 * pow(10, -6) * pow(t, 2) - 0.0906045209884312 * t + 5961.90970204993;
+//             } else {
                 a = 2.172653597427 * pow(10, -8) * pow(t, 2) - 0.0282022850738493 * t + 3697.35684913407;
-            }
+//             }
             break;
         case FLIGHT_DRIFT:
             if(t > 180000) {
