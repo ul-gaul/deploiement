@@ -26,9 +26,9 @@ simulation_end = 13303      # timestamp = 1330062
 
 # flight step timestamp offsets
 burnout_offset = 1152062 - 1135062
-predrogue_offset = 1172178 - 1152062
-premain_offset = 1175762 - 1172178
-drift_offset = 1260062 - 1175762
+predrogue_offset = 1172178 - 1152062 + 17184
+premain_offset = 1175762 - 1172178 + 37016
+drift_offset = 1260062 - 1175762 + 40900
 
 print("burnout offset =", burnout_offset)
 print("predrogue offset =", predrogue_offset)

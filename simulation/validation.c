@@ -61,8 +61,8 @@ int main() {
     altitude_up_to_date = 0;
     current_log.max_altitude = 0;
     count_apogee = 0;
-    parachutes.drogue = 0;
-    parachutes.main = 0;
+    parachutes.drogue = 1;
+    parachutes.main = 1;
     
     FILE* log_file = fopen("log.csv", "w");
     if(log_file == NULL) {
@@ -71,8 +71,8 @@ int main() {
     }
     fprintf(log_file,"t,current_flight_state,drogue,main,raw_altitude,filtered_altitude,speed,message\n");
     
-    for(unsigned long t = 0; t < 181000; t++) {
-        loop(t, log_file);
+    for(unsigned long t = 0; t < 1810; t++) {
+        loop(t*100, log_file);
     }
     fclose(log_file);
     return 0;
@@ -89,11 +89,9 @@ void loop(unsigned long t, FILE* f) {
                 parachutes.main, current_log.raw_altitude, 
                 current_log.filtered_altitude, current_log.speed);
     } else {
-        if(t % 100 == 0) {
-            fprintf(f, "%lu,%d,%d,%d,%f,%f,%f,\n", t, current_flight_state, 
-                parachutes.drogue, parachutes.main, current_log.raw_altitude, 
-                current_log.filtered_altitude, current_log.speed);
-        }
+        fprintf(f, "%lu,%d,%d,%d,%f,%f,%f,\n", t, current_flight_state, 
+            parachutes.drogue, parachutes.main, current_log.raw_altitude, 
+            current_log.filtered_altitude, current_log.speed);
         // follow flight plan
         switch(current_flight_state) {
             case FLIGHT_LAUNCHPAD:
@@ -130,7 +128,7 @@ void loop(unsigned long t, FILE* f) {
                                 parachutes.main, current_log.raw_altitude, 
                                 current_log.filtered_altitude, current_log.speed);
                         }
-                        parachutes.drogue = 1;
+                        parachutes.drogue = 0;
                         fprintf(f, "%lu,%d,%d,%d,%f,%f,%f,drogue out\n", t, 
                                 current_flight_state, parachutes.drogue,
                                 parachutes.main, current_log.raw_altitude, 
@@ -148,7 +146,7 @@ void loop(unsigned long t, FILE* f) {
                                 parachutes.main, current_log.raw_altitude, 
                                 current_log.filtered_altitude, current_log.speed);
                     }
-                    parachutes.main = 1;
+                    parachutes.main = 0;
                     fprintf(f, "%lu,%d,%d,%d,%f,%f,%f,main out\n", t, 
                             current_flight_state, parachutes.drogue,
                             parachutes.main, current_log.raw_altitude, 
@@ -260,8 +258,8 @@ float get_simulation_altitude(unsigned long t) {
             }
             break;
         case FLIGHT_BURNOUT:
-            if(t >= 37200) {
-                t = t - 37116;
+            if(t > 37300) {
+                t = t - 37300;
                 a = -1.29739044869357 * pow(10, -10) * pow(t, 3) + 2.63704851215904 * pow(10, -6) * pow(t, 2) + 0.0466018454543128 * t + 1605.2401465559;
             } else {
                 t = t - 17000;
@@ -269,27 +267,35 @@ float get_simulation_altitude(unsigned long t) {
             }
             break;
         case FLIGHT_PRE_DROGUE:
-            t = t - 37116;
-            a = -1.29739044869357 * pow(10, -10) * pow(t, 3) + 2.63704851215904 * pow(10, -6) * pow(t, 2) + 0.0466018454543128 * t + 1605.2401465559;
+            if(t > 37300) {
+                t = t - 37300;
+                a = -1.29739044869357 * pow(10, -10) * pow(t, 3) + 2.63704851215904 * pow(10, -6) * pow(t, 2) + 0.0466018454543128 * t + 1605.2401465559;
+            } else {
+                t = t - 17000;
+                a = -1.50157070738923 * pow(10, -10) * pow(t, 3) - 5.07498255323106 * pow(10, -7) * pow(t, 2) + 0.19493487583132 * t - 11.8122615878982;
+            }
             break;
         case FLIGHT_PRE_MAIN:
-            t = t - 40700;
-            a = -0.0246021995362092 * t + 3473.00742330786;
+            t = t - 32200;
+            a = -0.0246021995362091 * t + 2562.33240527554;
             break;
         case FLIGHT_DRIFT:
             if(t > 180000) {
                 // simulate next step
                 a = 0;
             } else {
-                t = t - 125000;
-                a = -0.0084133394471041 * t + 788.869942821509;
+                t = t - 118200;
+                a = -0.00841333944710411 * t + 444.764359434951;
             }
             break;
         case FLIGHT_LANDED:
             a = 0;
             break;
     }
-    a = (a >= 0) ? a : 1.0;
+    if(a < 0) {
+        printf("flight step = %d, a = %f, t = %lu\n", current_flight_state, a, t);
+        a = 1.0;
+    }
     return a;
 }
 
