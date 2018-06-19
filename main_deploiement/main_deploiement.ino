@@ -22,6 +22,7 @@
 
 
 #define TEST_MODE 1
+#define DATA_LOGGING 0
 
 
 enum FlightState {
@@ -76,21 +77,23 @@ void setup() {
     init_parachute(&para_drogue, IO_DROGUE_CTRL, IO_DROGUE_STATE);
     init_parachute(&para_main, IO_MAIN_CTRL, IO_MAIN_STATE);
     // init sd card
-//     pinMode(10, OUTPUT);
-//     while(1) {
-//         int sderror = init_sd_logger(&sdlogger, IO_SD_CS, LOG_UNIT_FILE_NAME);
-//         if(sderror != 0) {
-//             for(int i = 0; i < sderror; i++) {
-//                 buzzerON(&state_buzzer);
-//                 delay(100);
-//                 buzzerOFF(&state_buzzer);
-//                 delay(100);
-//             }
-//             delay(500);
-//         } else {
-//             break;
-//         }
-//     }
+#if DATA_LOGGING
+     pinMode(10, OUTPUT);
+     while(1) {
+         int sderror = init_sd_logger(&sdlogger, IO_SD_CS, LOG_UNIT_FILE_NAME);
+         if(sderror != 0) {
+             for(int i = 0; i < sderror; i++) {
+                 buzzerON(&state_buzzer);
+                 delay(100);
+                 buzzerOFF(&state_buzzer);
+                 delay(100);
+             }
+             delay(500);
+         } else {
+             break;
+         }
+     }
+#endif /* DATA_LOGGING */
 }
 
 void loop() {
@@ -100,7 +103,9 @@ void loop() {
         if(update_log_values(&current_log) == -1) {
             // invalid altitude, log the event
             String event = String("Invalid Altitude");
-//             log_event(&sdlogger, &current_log, event);
+#if DATA_LOGGING
+	    log_event(&sdlogger, &current_log, event);
+#endif /* DATA_LOGGING */
         } else {
             // follow flight plan
             switch(current_flight_state) {
@@ -112,15 +117,19 @@ void loop() {
                         (current_log.filtered_altitude > 
                         BREAKPOINT_ALTITUDE_TO_BURNOUT)) {
                         String event = String(MESSAGE_BURNOUT_STARTED);
-//                         log_event(&sdlogger, &current_log, event);
-                        current_flight_state = FLIGHT_BURNOUT;
+#if DATA_LOGGING
+                        log_event(&sdlogger, &current_log, event);
+#endif /* DATA_LOGGING */
+			current_flight_state = FLIGHT_BURNOUT;
                     }
                     break;
                 case FLIGHT_BURNOUT:
                     // check if burnout done
                     if(current_log.speed < BREAKPOINT_SPEED_TO_PRE_DROGUE) {
                         String event = String(MESSAGE_BURNOUT_FINISHED);
-//                         log_event(&sdlogger, &current_log, event);
+#if DATA_LOGGING
+                        log_event(&sdlogger, &current_log, event);
+#endif /* DATA_LOGGING */
                         current_flight_state = FLIGHT_PRE_DROGUE;
                     }
                     break;
@@ -132,11 +141,15 @@ void loop() {
                         if(para_state == TAG_PARACHUTE_NULL || 
                             para_state == TAG_PARACHUTE_MAIN_ONLY) {
                             String event = String(MESSAGE_DROGUE_ALREADY_OUT);
-//                             log_event(&sdlogger, &current_log, event);
+#if DATA_LOGGING
+                            log_event(&sdlogger, &current_log, event);
+#endif /* DATA_LOGGING */
                         }
                         deploy_parachute(&para_drogue);
                         String event = String(MESSAGE_DROGUE_OUT);
-//                         log_event(&sdlogger, &current_log, event);
+#if DATA_LOGGING
+                        log_event(&sdlogger, &current_log, event);
+#endif /* DATA_LOGGING */
                         current_flight_state = FLIGHT_PRE_MAIN;
                     }
                     break;
@@ -147,11 +160,15 @@ void loop() {
                     if(current_log.filtered_altitude < BREAKPOINT_ALTITUDE_TO_DRIFT) {
                         if(para_state == TAG_PARACHUTE_NULL) {
                             String event = String(MESSAGE_MAIN_ALREADY_OUT);
-//                             log_event(&sdlogger, &current_log, event);
-                        }
+#if DATA_LOGGING
+                        log_event(&sdlogger, &current_log, event);
+#endif /* DATA_LOGGING */
+			}
                         deploy_parachute(&para_main);
                         String event = String(MESSAGE_MAIN_OUT);
-//                         log_event(&sdlogger, &current_log, event);
+#if DATA_LOGGING
+                        log_event(&sdlogger, &current_log, event);
+#endif /* DATA_LOGGING */
                         current_flight_state = FLIGHT_DRIFT;
                     }
                     break;
@@ -159,7 +176,9 @@ void loop() {
                     // check that speed is at landed speed
                     if(current_log.speed < BREAKPOINT_SPEED_TO_IDLE) {
                         String event = String(MESSAGE_FLIGHT_FINISHED);
-//                         log_event(&sdlogger, &current_log, event);
+#if DATA_LOGGING
+                        log_event(&sdlogger, &current_log, event);
+#endif /* DATA_LOGGING */
                         current_flight_state = FLIGHT_LANDED;
                     }
                     break;
