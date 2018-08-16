@@ -1,10 +1,10 @@
-/* 
+/*
  * This is the program controlling the parachute deployment system
- * 
+ *
  * The program uses a BMP180 to measure altitude and logs its data on an
- * SD card. Various libraries are used to trigger the deployment of the 
- * drogue chute and the main chute. A buzzer is also used to indicate that 
- * the parachute's electronic matches are connected. Finally, all the 
+ * SD card. Various libraries are used to trigger the deployment of the
+ * drogue chute and the main chute. A buzzer is also used to indicate that
+ * the parachute's electronic matches are connected. Finally, all the
  * configuration values are stored in a seperate configuration file.
  */
 
@@ -26,18 +26,18 @@
 
 
 enum FlightState {
-    FLIGHT_LAUNCHPAD,
-    FLIGHT_BURNOUT,
-    FLIGHT_PRE_DROGUE,
-    FLIGHT_PRE_MAIN,
-    FLIGHT_DRIFT,
-    FLIGHT_LANDED
+	FLIGHT_LAUNCHPAD,
+	FLIGHT_BURNOUT,
+	FLIGHT_PRE_DROGUE,
+	FLIGHT_PRE_MAIN,
+	FLIGHT_DRIFT,
+	FLIGHT_LANDED
 };
 
 // function declarations
 void request_altitude_update();
-unsigned int check_parachutes(parachute* p_main, parachute* p_drogue, 
-                              buzzer* buz);
+unsigned int check_parachutes(parachute* p_main, parachute* p_drogue,
+							buzzer* buz);
 void init_altimeter();
 float get_altitude();
 float filter_altitude(float raw_alt);
@@ -63,279 +63,279 @@ float filtered_altitude_array[ALTITUDE_ARRAY_SIZE];
 
 
 void setup() {
-    // init buzzer
-    init_buzzer(&state_buzzer, IO_BUZZER_OUT, BUZZER_TIME_BETWEEN_SEQUENCES,
-                BUZZER_CYCLE_DURATION);
-    // init data related variables
-    altitude_up_to_date = 0;
-    current_log.max_altitude = 0;
-    count_apogee = 0;
-    // attach interrupt to altitude update function
-    Timer1.initialize(DATA_SAMPLING_PERIOD);
-    Timer1.attachInterrupt(request_altitude_update);
-    // init parachutes
-    init_parachute(&para_drogue, IO_DROGUE_CTRL, IO_DROGUE_STATE);
-    init_parachute(&para_main, IO_MAIN_CTRL, IO_MAIN_STATE);
-    // init sd card
+	// init buzzer
+	init_buzzer(&state_buzzer, IO_BUZZER_OUT, BUZZER_TIME_BETWEEN_SEQUENCES,
+				BUZZER_CYCLE_DURATION);
+	// init data related variables
+	altitude_up_to_date = 0;
+	current_log.max_altitude = 0;
+	count_apogee = 0;
+	// attach interrupt to altitude update function
+	Timer1.initialize(DATA_SAMPLING_PERIOD);
+	Timer1.attachInterrupt(request_altitude_update);
+	// init parachutes
+	init_parachute(&para_drogue, IO_DROGUE_CTRL, IO_DROGUE_STATE);
+	init_parachute(&para_main, IO_MAIN_CTRL, IO_MAIN_STATE);
+	// init sd card
 #if DATA_LOGGING
-     pinMode(10, OUTPUT);
-     while(1) {
-         int sderror = init_sd_logger(&sdlogger, IO_SD_CS, LOG_UNIT_FILE_NAME);
-         if(sderror != 0) {
-             for(int i = 0; i < sderror; i++) {
-                 buzzerON(&state_buzzer);
-                 delay(100);
-                 buzzerOFF(&state_buzzer);
-                 delay(100);
-             }
-             delay(500);
-         } else {
-             break;
-         }
-     }
+	 pinMode(10, OUTPUT);
+	 while(1) {
+		 int sderror = init_sd_logger(&sdlogger, IO_SD_CS, LOG_UNIT_FILE_NAME);
+		 if(sderror != 0) {
+			 for(int i = 0; i < sderror; i++) {
+				 buzzerON(&state_buzzer);
+				 delay(100);
+				 buzzerOFF(&state_buzzer);
+				 delay(100);
+			 }
+			 delay(500);
+		 } else {
+			 break;
+		 }
+	 }
 #endif /* DATA_LOGGING */
 }
 
 void loop() {
-//     check_parachutes(&para_main, &para_drogue, &state_buzzer);
-    if(!altitude_up_to_date) {
-        // update altitude and other data in the current log
-        if(update_log_values(&current_log) == -1) {
-            // invalid altitude, log the event
-            String event = String("Invalid Altitude");
+//	 check_parachutes(&para_main, &para_drogue, &state_buzzer);
+	if(!altitude_up_to_date) {
+		// update altitude and other data in the current log
+		if(update_log_values(&current_log) == -1) {
+			// invalid altitude, log the event
+			String event = String("Invalid Altitude");
 #if DATA_LOGGING
-	    log_event(&sdlogger, &current_log, event);
+		log_event(&sdlogger, &current_log, event);
 #endif /* DATA_LOGGING */
-        } else {
-            // follow flight plan
-            switch(current_flight_state) {
-                case FLIGHT_LAUNCHPAD:
-                    para_state = check_parachutes(&para_main, &para_drogue, 
-                                                  &state_buzzer);
-                    // check if burnout started
-                    if((current_log.speed > BREAKPOINT_SPEED_TO_BURNOUT) &&
-                        (current_log.filtered_altitude > 
-                        BREAKPOINT_ALTITUDE_TO_BURNOUT)) {
-                        String event = String(MESSAGE_BURNOUT_STARTED);
+		} else {
+			// follow flight plan
+			switch(current_flight_state) {
+				case FLIGHT_LAUNCHPAD:
+					para_state = check_parachutes(&para_main, &para_drogue,
+												  &state_buzzer);
+					// check if burnout started
+					if((current_log.speed > BREAKPOINT_SPEED_TO_BURNOUT) &&
+						(current_log.filtered_altitude >
+						BREAKPOINT_ALTITUDE_TO_BURNOUT)) {
+						String event = String(MESSAGE_BURNOUT_STARTED);
 #if DATA_LOGGING
-                        log_event(&sdlogger, &current_log, event);
+						log_event(&sdlogger, &current_log, event);
 #endif /* DATA_LOGGING */
 			current_flight_state = FLIGHT_BURNOUT;
-                    }
-                    break;
-                case FLIGHT_BURNOUT:
-                    // check if burnout done
-                    if(current_log.speed < BREAKPOINT_SPEED_TO_PRE_DROGUE) {
-                        String event = String(MESSAGE_BURNOUT_FINISHED);
+					}
+					break;
+				case FLIGHT_BURNOUT:
+					// check if burnout done
+					if(current_log.speed < BREAKPOINT_SPEED_TO_PRE_DROGUE) {
+						String event = String(MESSAGE_BURNOUT_FINISHED);
 #if DATA_LOGGING
-                        log_event(&sdlogger, &current_log, event);
+						log_event(&sdlogger, &current_log, event);
 #endif /* DATA_LOGGING */
-                        current_flight_state = FLIGHT_PRE_DROGUE;
-                    }
-                    break;
-                case FLIGHT_PRE_DROGUE:
-                    para_state = check_parachutes(&para_main, &para_drogue, 
-                                                  &state_buzzer);
-                    // check if apogee reached, if so: deploy drogue
-                    if(count_apogee >= BREAKPOINT_DELTA_TIME_APOGEE) {
-                        if(para_state == TAG_PARACHUTE_NULL || 
-                            para_state == TAG_PARACHUTE_MAIN_ONLY) {
-                            String event = String(MESSAGE_DROGUE_ALREADY_OUT);
+						current_flight_state = FLIGHT_PRE_DROGUE;
+					}
+					break;
+				case FLIGHT_PRE_DROGUE:
+					para_state = check_parachutes(&para_main, &para_drogue,
+												  &state_buzzer);
+					// check if apogee reached, if so: deploy drogue
+					if(count_apogee >= BREAKPOINT_DELTA_TIME_APOGEE) {
+						if(para_state == TAG_PARACHUTE_NULL ||
+							para_state == TAG_PARACHUTE_MAIN_ONLY) {
+							String event = String(MESSAGE_DROGUE_ALREADY_OUT);
 #if DATA_LOGGING
-                            log_event(&sdlogger, &current_log, event);
+							log_event(&sdlogger, &current_log, event);
 #endif /* DATA_LOGGING */
-                        }
-                        deploy_parachute(&para_drogue);
-                        String event = String(MESSAGE_DROGUE_OUT);
+						}
+						deploy_parachute(&para_drogue);
+						String event = String(MESSAGE_DROGUE_OUT);
 #if DATA_LOGGING
-                        log_event(&sdlogger, &current_log, event);
+						log_event(&sdlogger, &current_log, event);
 #endif /* DATA_LOGGING */
-                        current_flight_state = FLIGHT_PRE_MAIN;
-                    }
-                    break;
-                case FLIGHT_PRE_MAIN:
-                    // check if altitude for main is reached, if so: deploy main
-                    para_state = check_parachutes(&para_main, &para_drogue, 
-                                                  &state_buzzer);
-                    if(current_log.filtered_altitude < BREAKPOINT_ALTITUDE_TO_DRIFT) {
-                        if(para_state == TAG_PARACHUTE_NULL) {
-                            String event = String(MESSAGE_MAIN_ALREADY_OUT);
+						current_flight_state = FLIGHT_PRE_MAIN;
+					}
+					break;
+				case FLIGHT_PRE_MAIN:
+					// check if altitude for main is reached, if so: deploy main
+					para_state = check_parachutes(&para_main, &para_drogue,
+												  &state_buzzer);
+					if(current_log.filtered_altitude < BREAKPOINT_ALTITUDE_TO_DRIFT) {
+						if(para_state == TAG_PARACHUTE_NULL) {
+							String event = String(MESSAGE_MAIN_ALREADY_OUT);
 #if DATA_LOGGING
-                        log_event(&sdlogger, &current_log, event);
+						log_event(&sdlogger, &current_log, event);
 #endif /* DATA_LOGGING */
 			}
-                        deploy_parachute(&para_main);
-                        String event = String(MESSAGE_MAIN_OUT);
+						deploy_parachute(&para_main);
+						String event = String(MESSAGE_MAIN_OUT);
 #if DATA_LOGGING
-                        log_event(&sdlogger, &current_log, event);
+						log_event(&sdlogger, &current_log, event);
 #endif /* DATA_LOGGING */
-                        current_flight_state = FLIGHT_DRIFT;
-                    }
-                    break;
-                case FLIGHT_DRIFT:
-                    // check that speed is at landed speed
-                    if(current_log.speed < BREAKPOINT_SPEED_TO_IDLE) {
-                        String event = String(MESSAGE_FLIGHT_FINISHED);
+						current_flight_state = FLIGHT_DRIFT;
+					}
+					break;
+				case FLIGHT_DRIFT:
+					// check that speed is at landed speed
+					if(current_log.speed < BREAKPOINT_SPEED_TO_IDLE) {
+						String event = String(MESSAGE_FLIGHT_FINISHED);
 #if DATA_LOGGING
-                        log_event(&sdlogger, &current_log, event);
+						log_event(&sdlogger, &current_log, event);
 #endif /* DATA_LOGGING */
-                        current_flight_state = FLIGHT_LANDED;
-                    }
-                    break;
-                case FLIGHT_LANDED:
-                    para_state = check_parachutes(&para_main, &para_drogue,
-                                                  &state_buzzer);
-                    for(int i = 0; i < 10; i++) {
-                        buzzerON(&state_buzzer);
-                        delay(100);
-                        buzzerOFF(&state_buzzer);
-                        delay(100);
-                    }
-                    break;
-            }
-        }
-        altitude_up_to_date = 1;
-    }
+						current_flight_state = FLIGHT_LANDED;
+					}
+					break;
+				case FLIGHT_LANDED:
+					para_state = check_parachutes(&para_main, &para_drogue,
+												  &state_buzzer);
+					for(int i = 0; i < 10; i++) {
+						buzzerON(&state_buzzer);
+						delay(100);
+						buzzerOFF(&state_buzzer);
+						delay(100);
+					}
+					break;
+			}
+		}
+		altitude_up_to_date = 1;
+	}
 }
 
 void request_altitude_update() {
-    altitude_up_to_date = 0;
+	altitude_up_to_date = 0;
 }
 
-unsigned int check_parachutes(parachute* p_main, parachute* p_drogue, 
-                              buzzer* buz) {
-    /* get states of the parachutes
-     * Truth table is the following:
-     *      main    drogue      global state
-     *      0       0           0
-     *      0       1           1
-     *      1       0           2
-     *      1       1           3
-     */
-    unsigned int main_state;
-    unsigned int drogue_state;
-    main_state = check_connection(p_main);
-    drogue_state = check_connection(p_drogue);
-    // play appropriate buzzer sequence (parachute state + 1 = number of beeps)
-    execute_sequence(buz, main_state * 2 + drogue_state + 1);
-    // return the global parachute state
-    return main_state * 2 + drogue_state;
+unsigned int check_parachutes(parachute* p_main, parachute* p_drogue,
+							  buzzer* buz) {
+	/* get states of the parachutes
+	 * Truth table is the following:
+	 *	  main	drogue	  global state
+	 *	  0	   0		   0
+	 *	  0	   1		   1
+	 *	  1	   0		   2
+	 *	  1	   1		   3
+	 */
+	unsigned int main_state;
+	unsigned int drogue_state;
+	main_state = check_connection(p_main);
+	drogue_state = check_connection(p_drogue);
+	// play appropriate buzzer sequence (parachute state + 1 = number of beeps)
+	execute_sequence(buz, main_state * 2 + drogue_state + 1);
+	// return the global parachute state
+	return main_state * 2 + drogue_state;
 }
 
 void init_altimeter() {
-    altimeter.begin();
-    groundPressure = altimeter.readPressure();
+	altimeter.begin();
+	groundPressure = altimeter.readPressure();
 }
 
 float get_altitude() {
-    return altimeter.readAltitude(groundPressure);
+	return altimeter.readAltitude(groundPressure);
 }
 
 float filter_altitude(float raw_alt) {
-    // shift the array right
-    for (int k = ALTITUDE_ARRAY_SIZE; k > 0; k--){        
-        raw_altitude_array[k] = raw_altitude_array[k - 1];
-        filtered_altitude_array[k] = filtered_altitude_array[k - 1];
-    }
-    raw_altitude_array[0] = raw_alt;
-    filtered_altitude_array[0] = 0;
-    // apply the filter
-    for(int i = 0; i < ALTITUDE_ARRAY_SIZE; i++) {
-        filtered_altitude_array[0] += (B[i]*raw_altitude_array[i] - 
-        A[i]*filtered_altitude_array[i]);
-    }
-    return filtered_altitude_array[0];
+	// shift the array right
+	for (int k = ALTITUDE_ARRAY_SIZE; k > 0; k--){
+		raw_altitude_array[k] = raw_altitude_array[k - 1];
+		filtered_altitude_array[k] = filtered_altitude_array[k - 1];
+	}
+	raw_altitude_array[0] = raw_alt;
+	filtered_altitude_array[0] = 0;
+	// apply the filter
+	for(int i = 0; i < ALTITUDE_ARRAY_SIZE; i++) {
+		filtered_altitude_array[0] += (B[i]*raw_altitude_array[i] -
+		A[i]*filtered_altitude_array[i]);
+	}
+	return filtered_altitude_array[0];
 }
 
 float get_speed() {
-    float speed = 0;
-    for(int i = 0; i < ALTITUDE_ARRAY_SIZE - 1; i++) {
-        speed += (filtered_altitude_array[i] - filtered_altitude_array[i + 1]);
-    }
-    speed = speed/(ALTITUDE_ARRAY_SIZE - 1);
-    return (speed >= 0) ? speed : (-1) * speed;
+	float speed = 0;
+	for(int i = 0; i < ALTITUDE_ARRAY_SIZE - 1; i++) {
+		speed += (filtered_altitude_array[i] - filtered_altitude_array[i + 1]);
+	}
+	speed = speed/(ALTITUDE_ARRAY_SIZE - 1);
+	return (speed >= 0) ? speed : (-1) * speed;
 }
 
 int update_log_values(sd_log* log) {
-    float tmp_raw_alt;
-    if(TEST_MODE) {
-        tmp_raw_alt = get_simulation_altitude();
-    } else {
-        tmp_raw_alt = get_altitude();
-    }
-    // check that altitude is valid
-    if(tmp_raw_alt < FLIGHT_MINIMAL_ALTITUDE - 
-        ALTIMETER_INVALID_ALTITUDE_TOLERANCE || tmp_raw_alt >  
-        FLIGHT_MAXIMAL_ALTITUDE + ALTIMETER_INVALID_ALTITUDE_TOLERANCE) {
-        return -1;
-    } else {
-        log->raw_altitude = tmp_raw_alt;
-        log->filtered_altitude = filter_altitude(tmp_raw_alt);
-        if(log->filtered_altitude > log->max_altitude) {
-            log->max_altitude = log->filtered_altitude;
-            count_apogee = 0;
-        } else {
-            count_apogee++;
-        }
-        log->speed = get_speed();
-    }
-    return 0;
+	float tmp_raw_alt;
+	if(TEST_MODE) {
+		tmp_raw_alt = get_simulation_altitude();
+	} else {
+		tmp_raw_alt = get_altitude();
+	}
+	// check that altitude is valid
+	if(tmp_raw_alt < FLIGHT_MINIMAL_ALTITUDE -
+		ALTIMETER_INVALID_ALTITUDE_TOLERANCE || tmp_raw_alt >
+		FLIGHT_MAXIMAL_ALTITUDE + ALTIMETER_INVALID_ALTITUDE_TOLERANCE) {
+		return -1;
+	} else {
+		log->raw_altitude = tmp_raw_alt;
+		log->filtered_altitude = filter_altitude(tmp_raw_alt);
+		if(log->filtered_altitude > log->max_altitude) {
+			log->max_altitude = log->filtered_altitude;
+			count_apogee = 0;
+		} else {
+			count_apogee++;
+		}
+		log->speed = get_speed();
+	}
+	return 0;
 }
 
 float get_simulation_altitude() {
-    unsigned long t = millis();
-    float a;
-    /*
-     * some simulations step changes are time triggered:
-     *      burnout, predrogue and landed
-     * while the others are triggered by the current step of the flight
-     */
-    switch(current_flight_state) {
-        case FLIGHT_LAUNCHPAD:
-            if(t >= 17000) {
-                t = t - 17000;
-                a = -1.50157070738923 * pow(10, -10) * pow(t, 3) - 5.07498255323106 * pow(10, -7) * pow(t, 2) + 0.19493487583132 * t - 11.8122615878982;
-            } else {
-                a = 4.24130141489228 * pow(10, -5) * t + 1.40090814584814;
-            }
-            break;
-        case FLIGHT_BURNOUT:
-            if(t > 37300) {
-                t = t - 37300;
-                a = -1.29739044869357 * pow(10, -10) * pow(t, 3) + 2.63704851215904 * pow(10, -6) * pow(t, 2) + 0.0466018454543128 * t + 1605.2401465559;
-            } else {
-                t = t - 17000;
-                a = -1.50157070738923 * pow(10, -10) * pow(t, 3) - 5.07498255323106 * pow(10, -7) * pow(t, 2) + 0.19493487583132 * t - 11.8122615878982;
-            }
-            break;
-        case FLIGHT_PRE_DROGUE:
-            if(t > 37300) {
-                t = t - 37300;
-                a = -1.29739044869357 * pow(10, -10) * pow(t, 3) + 2.63704851215904 * pow(10, -6) * pow(t, 2) + 0.0466018454543128 * t + 1605.2401465559;
-            } else {
-                t = t - 17000;
-                a = -1.50157070738923 * pow(10, -10) * pow(t, 3) - 5.07498255323106 * pow(10, -7) * pow(t, 2) + 0.19493487583132 * t - 11.8122615878982;
-            }
-            break;
-        case FLIGHT_PRE_MAIN:
-            t = t - 32200;
-            a = -0.0246021995362091 * t + 2562.33240527554;
-            break;
-        case FLIGHT_DRIFT:
-            if(t > 180000) {
-                // simulate next step
-                a = 0;
-            } else {
-                t = t - 118200;
-                a = -0.00841333944710411 * t + 444.764359434951;
-            }
-            break;
-        case FLIGHT_LANDED:
-            a = 0;
-            break;
-    }
-    if(a < 0) {
-        a = 1.0;
-    }
-    return a;
+	unsigned long t = millis();
+	float a;
+	/*
+	 * some simulations step changes are time triggered:
+	 *	  burnout, predrogue and landed
+	 * while the others are triggered by the current step of the flight
+	 */
+	switch(current_flight_state) {
+		case FLIGHT_LAUNCHPAD:
+			if(t >= 17000) {
+				t = t - 17000;
+				a = -1.50157070738923 * pow(10, -10) * pow(t, 3) - 5.07498255323106 * pow(10, -7) * pow(t, 2) + 0.19493487583132 * t - 11.8122615878982;
+			} else {
+				a = 4.24130141489228 * pow(10, -5) * t + 1.40090814584814;
+			}
+			break;
+		case FLIGHT_BURNOUT:
+			if(t > 37300) {
+				t = t - 37300;
+				a = -1.29739044869357 * pow(10, -10) * pow(t, 3) + 2.63704851215904 * pow(10, -6) * pow(t, 2) + 0.0466018454543128 * t + 1605.2401465559;
+			} else {
+				t = t - 17000;
+				a = -1.50157070738923 * pow(10, -10) * pow(t, 3) - 5.07498255323106 * pow(10, -7) * pow(t, 2) + 0.19493487583132 * t - 11.8122615878982;
+			}
+			break;
+		case FLIGHT_PRE_DROGUE:
+			if(t > 37300) {
+				t = t - 37300;
+				a = -1.29739044869357 * pow(10, -10) * pow(t, 3) + 2.63704851215904 * pow(10, -6) * pow(t, 2) + 0.0466018454543128 * t + 1605.2401465559;
+			} else {
+				t = t - 17000;
+				a = -1.50157070738923 * pow(10, -10) * pow(t, 3) - 5.07498255323106 * pow(10, -7) * pow(t, 2) + 0.19493487583132 * t - 11.8122615878982;
+			}
+			break;
+		case FLIGHT_PRE_MAIN:
+			t = t - 32200;
+			a = -0.0246021995362091 * t + 2562.33240527554;
+			break;
+		case FLIGHT_DRIFT:
+			if(t > 180000) {
+				// simulate next step
+				a = 0;
+			} else {
+				t = t - 118200;
+				a = -0.00841333944710411 * t + 444.764359434951;
+			}
+			break;
+		case FLIGHT_LANDED:
+			a = 0;
+			break;
+	}
+	if(a < 0) {
+		a = 1.0;
+	}
+	return a;
 }

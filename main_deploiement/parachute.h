@@ -9,8 +9,8 @@
 #include <Arduino.h>
 
 typedef struct {
-    unsigned int control_pin;
-    unsigned int state_pin;
+	unsigned int control_pin;
+	unsigned int state_pin;
 } parachute;
 
 void init_parachute(parachute* para, unsigned int control, unsigned int state);

@@ -95,13 +95,13 @@
 /*
  * The filter used is an elliptical low pass filter. The equation was computed
  * using Matlab's Ellip(() function)
- * 
+ *
  * The filter's parameters are:
  *     N   = 3;        filter order
  *     Wp  = 0.1;      cutoff frequency
- *     Rp  = 0.05;     Peak-to-peak ripple      
+ *     Rp  = 0.05;     Peak-to-peak ripple
  *     Rst = 40;       Stopband attenuation
- * 
+ *
  * The filter's equation is:
  *    A0*y[n] = B0*x[n] + B1*x[n-1] + B2*x[n-2] + B3*x[n-3] - A1*y[n-1] - A2*y[n-2] - A3*y[n-3]
  */
@@ -110,17 +110,17 @@
 #define ALTITUDE_ARRAY_SIZE     (ALTITUDE_FILTER_ORDER+1)
 
 const float A[ALTITUDE_ARRAY_SIZE] = {
-    1,                    // A0
-    -2.242002473393440,   // A1
-    1.789446106565067,    // A2
-    -0.495145905738350    // A3
+	1,                    // A0
+	-2.242002473393440,   // A1
+	1.789446106565067,    // A2
+	-0.495145905738350    // A3
 };
 
 const float B[ALTITUDE_ARRAY_SIZE] = {
-    0.019249185590260,    // B0
-    0.006899678126378,    // B1
-    0.006899678126378,    // B2
-    0.019249185590260     // B3
+	0.019249185590260,    // B0
+	0.006899678126378,    // B1
+	0.006899678126378,    // B2
+	0.019249185590260     // B3
 };
 
 
