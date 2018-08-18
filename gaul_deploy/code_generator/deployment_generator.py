@@ -30,7 +30,9 @@ class GenericTemplate:
 		self.kwargs[key] = value
 
 
-deployment_configuration = GenericTemplate(j2_env.get_template('test.j2'))
-deployment_configuration['a'] = 'allo'
-deployment_configuration['b'] = 'asldfjasl;djkf asdf;asjldfkljasd'
-deployment_configuration.to_file('test.out')
+deploy_config = GenericTemplate(j2_env.get_template(
+	'config_deploiement.j2'))
+deploy_config['buzzer_time_between_sequences'] = 4000
+deploy_config['buzzer_cycle_duration'] = 500
+deploy_config['altitude_filter_order'] = 3
+deploy_config.to_file('test.out')

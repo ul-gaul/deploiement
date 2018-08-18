@@ -2,3 +2,5 @@ simulation/validation.o
 simulation/log.csv
 gaul_deploy/code_generator/__pycache__
 *.pyc
+gaul_deploy/code_generator/test.out
+gaul_deploy/code_generator/templates/test.j2
