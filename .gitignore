@@ -1,2 +1,4 @@
 simulation/validation.o
 simulation/log.csv
+gaul_deploy/code_generator/__pycache__
+*.pyc
