@@ -107,23 +107,25 @@ const float B[ALTITUDE_ARRAY_SIZE] = {
 //----------------------------------------------------------------------------
 //  Paramètres de la boucle principale
 
-// Fréquence d'échantillonage
-#define DATA_SAMPLING_PERIOD 100000 // 100000 micro-secondes ou un fréquence de 10 Hz.
+// Fréquence d'échantillonage des données en micro-secondes
+#define DATA_SAMPLING_PERIOD {{ data_sampling_period }}
 
 //----------------------------------------------------------------------------
-// Breakpoint d'altitude (m) et de vitessse (m/ech) ou un echétantillion est 0,1 s
-#define BREAKPOINT_SPEED_TO_BURNOUT 3    // 30 m/s - Breakpoint pour passer du launchpad au burnout
-#define BREAKPOINT_SPEED_TO_PRE_DROGUE 3    // 30 m/s - Breakpoint pour passer du burnout au predrogue
-#define BREAKPOINT_SPEED_TO_IDLE 0.01  // 0,1 m/s - Breakpoint pour passer de la descent à innactif au sol
+// Breakpoint d'altitude (m) et de vitessse (m/ech) ou un échantillon est 0,1 s
+#define BREAKPOINT_SPEED_TO_BURNOUT {{ '%0.4f' % (breakpoint_speed_to_burnout *
+	(data_sampling_period / 1000000.0)) | float }}
+#define BREAKPOINT_SPEED_TO_PRE_DROGUE {{ '%0.4f' % (breakpoint_speed_to_pre_drogue *
+	(data_sampling_period / 1000000.0)) | float }}
+#define BREAKPOINT_SPEED_TO_IDLE {{ '%0.4f' % (breakpoint_speed_to_idle *
+	(data_sampling_period / 1000000.0)) | float }}
 
-#define BREAKPOINT_ALTITUDE_TO_BURNOUT 6   // 6 m - Breakpoint pour passer du launchpad au burnout
-#define BREAKPOINT_ALTITUDE_TO_DRIFT 460 // 450 m - Breakpoint pour passer de premain à descente
-
+#define BREAKPOINT_ALTITUDE_TO_BURNOUT {{ breakpoint_altitude_to_burnout }}
+#define BREAKPOINT_ALTITUDE_TO_DRIFT {{ breakpoint_altitude_to_drift }}
 // Breakpoint du nombre d'échantillion d'altitude entre l'apogée et le déploiement du drogue.
-#define BREAKPOINT_DELTA_TIME_APOGEE 4  // 0,4s
+#define BREAKPOINT_DELTA_TIME_APOGEE {{ breakpoint_delta_time_apogee }}
 
 // Range d'altitude prévu
-#define FLIGHT_MINIMAL_ALTITUDE 0.0 // 0 m
-#define FLIGHT_MAXIMAL_ALTITUDE 4000.0 // 4000 m ou 13000 pieds
+#define FLIGHT_MINIMAL_ALTITUDE {{ flight_maximal_altitude }}
+#define FLIGHT_MAXIMAL_ALTITUDE {{ flight_minimal_alitude }}
 
 #endif
