@@ -84,11 +84,19 @@ class FlightConfigMenu(BaseMenu):
 		self.deploy_config[param] = new_value
 
 
+class GenerateCodeMenu(BaseMenu):
+
+	def __call__(self):
+		super().__call__()
+		input('generate code!')
+
+
 def main():
 	main_menu = MainMenu('GAUL - Deployment code generator')
 	edit_flight_conf = FlightConfigMenu("Edit the flight's parameters")
+	generate_code = GenerateCodeMenu('Generate the code')
 	exit_menu = ExitMenu('Exit')
-	main_menu.menus = [edit_flight_conf, exit_menu]
+	main_menu.menus = [edit_flight_conf, generate_code, exit_menu]
 	while True:
 		main_menu()
 
