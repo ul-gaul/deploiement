@@ -12,9 +12,10 @@ j2_env = Environment(loader=FileSystemLoader(path.join(dir_path, 'templates')),
 
 class GenericTemplate:
 
-	def __init__(self, template):
+	def __init__(self, name, template):
 		self.template = template
 		self.kwargs = {}
+		self.name = name
 
 	def render(self):
 		return self.template.render(**self.kwargs) + '\n'
@@ -31,8 +32,8 @@ class GenericTemplate:
 
 
 def make_deploy_config():
-	deploy_config = GenericTemplate(j2_env.get_template(
-		'config_deploiement.j2'))
+	deploy_config = GenericTemplate('config_deploiement',
+		j2_env.get_template('config_deploiement.j2'))
 	deploy_config['buzzer_time_between_sequences'] = 4000
 	deploy_config['buzzer_cycle_duration'] = 500
 	deploy_config['altitude_filter_order'] = 3
