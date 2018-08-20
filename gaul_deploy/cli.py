@@ -141,7 +141,6 @@ class GenerateCodeMenu(BaseMenu):
 			return self.RUN_MENU_AGAIN
 
 
-
 def main():
 	# make the flight config generic template
 	deploy_config = make_deploy_config()
